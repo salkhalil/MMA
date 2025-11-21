@@ -15,11 +15,12 @@ export default function StatsCard({
 }: StatsCardProps) {
   return (
     <div
-      className={`${bgClass} rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-slate-700`}
+      className={`${bgClass} rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 border`}
+      style={{ borderColor: "var(--card-border)" }}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+          <p className="text-sm font-medium mb-1" style={{ color: "var(--text-secondary)" }}>
             {label}
           </p>
           <p className={`text-3xl font-bold ${colorClass}`}>{value}</p>

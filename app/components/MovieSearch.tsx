@@ -74,7 +74,8 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       <div className="relative mb-8 group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <svg
-            className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200"
+            className="h-5 w-5 transition-colors duration-200"
+            style={{ color: "var(--text-tertiary)" }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -94,16 +95,22 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a movie..."
-          className="w-full pl-12 pr-12 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 text-lg text-gray-900 placeholder-gray-400 shadow-sm hover:shadow-md focus:shadow-lg"
+          className="w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-200 text-lg shadow-sm hover:shadow-md focus:shadow-lg"
+          style={{ 
+            backgroundColor: "var(--card-bg)", 
+            borderColor: "var(--card-border)", 
+            color: "var(--text-primary)"
+          }}
         />
 
         <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
           {isSearching ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: "var(--primary)" }}></div>
           ) : query ? (
             <button
               onClick={handleClear}
-              className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              className="p-1 rounded-full transition-colors duration-200"
+              style={{ color: "var(--text-tertiary)" }}
               aria-label="Clear search"
             >
               <svg
@@ -127,10 +134,10 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       {!isSearching && hasSearched && results.length === 0 && (
         <div className="text-center py-12 animate-fade-in-up">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
             No results found
           </h3>
-          <p className="text-gray-600">
+          <p style={{ color: "var(--text-secondary)" }}>
             We couldn't find any movies matching "{query}"
           </p>
         </div>
@@ -139,7 +146,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       {results.length > 0 && (
         <div className="animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
               Found {results.length} result{results.length !== 1 ? "s" : ""}
             </h3>
           </div>

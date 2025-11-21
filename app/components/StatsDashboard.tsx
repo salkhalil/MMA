@@ -65,24 +65,40 @@ export default function StatsDashboard({ movies, filters }: StatsDashboardProps)
   return (
     <div className="mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <StatsCard
-          icon="🎬"
-          value={totalMovies}
-          label={`Total Movies${hasActiveFilters ? ' (filtered)' : ''}`}
-          colorClass="text-blue-600 dark:text-blue-400"
-          bgClass="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20"
-        />
+        <div 
+          className="rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 border" 
+          style={{ 
+            background: "var(--gradient-secondary)",
+            borderColor: "var(--card-border)"
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium mb-1" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
+                {`Total Movies${hasActiveFilters ? ' (filtered)' : ''}`}
+              </p>
+              <p className="text-3xl font-bold text-white">{totalMovies}</p>
+            </div>
+            <div className="text-4xl opacity-80">🎬</div>
+          </div>
+        </div>
         {topWatcher && (
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-slate-700">
+          <div 
+            className="rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 border" 
+            style={{ 
+              background: "var(--gradient-primary)",
+              borderColor: "var(--card-border)"
+            }}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                <p className="text-sm font-medium mb-1" style={{ color: "rgba(255, 255, 255, 0.9)" }}>
                   Top Watcher
                 </p>
-                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                <p className="text-2xl font-bold text-white">
                   {topWatcher.name}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-sm mt-1" style={{ color: "rgba(255, 255, 255, 0.8)" }}>
                   {topWatcher.count} movie{topWatcher.count !== 1 ? 's' : ''}
                 </p>
               </div>
