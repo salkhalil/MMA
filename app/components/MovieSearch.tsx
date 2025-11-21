@@ -44,7 +44,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
         } else {
           console.error('Search error:', data.error);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error searching movies:', error);
       } finally {
         setIsSearching(false);

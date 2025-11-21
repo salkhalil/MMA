@@ -23,7 +23,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error deleting movie:", error);
     return NextResponse.json(
       { error: "Failed to delete movie" },

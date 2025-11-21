@@ -53,7 +53,7 @@ export default function AddMovieModal({
         viewerIds: selectedUserIds,
       });
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding movie:', error);
       alert('Failed to add movie');
     } finally {

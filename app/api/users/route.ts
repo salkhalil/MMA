@@ -7,7 +7,7 @@ export async function GET() {
       orderBy: { name: "asc" },
     });
     return NextResponse.json(users);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Failed to fetch users" },

@@ -28,7 +28,7 @@ export default function LoginPage() {
         const data = await res.json();
         setError(data.error || 'Invalid password');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError('Something went wrong');
     } finally {
       setLoading(false);

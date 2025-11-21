@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(movie);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error suggesting movie:', error);
     return NextResponse.json(
       { error: 'Failed to suggest movie' },

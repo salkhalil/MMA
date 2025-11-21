@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   try {
     const results = await searchMovies(query);
     return NextResponse.json(results);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error searching movies:", error);
     return NextResponse.json(
       { error: "Failed to search movies" },

@@ -23,7 +23,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(moviesWithStats);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching movies:", error);
     return NextResponse.json(
       { error: "Failed to fetch movies" },

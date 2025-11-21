@@ -28,7 +28,7 @@ export default function Home() {
       if (data.length > 0) {
         setCurrentUserId(data[0].id);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching users:", error);
     }
   };
@@ -44,7 +44,7 @@ export default function Home() {
         console.error("Invalid response format:", data);
         setMovies([]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching movies:", error);
       setMovies([]);
     } finally {
@@ -73,7 +73,7 @@ export default function Home() {
       } else {
         throw new Error("Failed to add movie");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       throw error;
     }
   };
@@ -101,7 +101,7 @@ export default function Home() {
       } else {
         throw new Error("Failed to add viewer");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       throw error;
     }
   };
@@ -117,7 +117,7 @@ export default function Home() {
       } else {
         throw new Error("Failed to delete movie");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error deleting movie:", error);
       throw error;
     }

@@ -90,7 +90,7 @@ function MovieListItem({ movie, currentUserId, onAddViewer, onDelete }: MovieLis
   const handleAddSelf = async () => {
     try {
       await onAddViewer(movie.tmdbId, currentUserId);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding viewer:', error);
       alert('Failed to add viewer');
     }
@@ -100,7 +100,7 @@ function MovieListItem({ movie, currentUserId, onAddViewer, onDelete }: MovieLis
     if (confirm('Are you sure you want to delete this movie?')) {
       try {
         await onDelete(movie.tmdbId);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error deleting movie:', error);
         alert('Failed to delete movie');
       }
