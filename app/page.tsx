@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import MovieSearch from "./components/MovieSearch";
 import AddMovieModal from "./components/AddMovieModal";
 import SuggestedMoviesList from "./components/SuggestedMoviesList";
 import UserSelector from "./components/UserSelector";
 import Footer from "./components/Footer";
 import FilterPanel, { FilterOptions } from "./components/FilterPanel";
+import StatsDashboard from "./components/StatsDashboard";
 import { TMDBMovie, User, Movie, MovieSuggestionData } from "@/types";
 
 export default function Home() {
@@ -142,6 +144,16 @@ export default function Home() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <header className="mb-6 sm:mb-8 text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo.png"
+              alt="Mandem Movie Awards"
+              width={200}
+              height={200}
+              className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48"
+              priority
+            />
+          </div>
           <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3"
             style={{
@@ -151,7 +163,7 @@ export default function Home() {
               backgroundClip: "text",
             }}
           >
-            🎬 Mandem Movie Awards 2025
+            Mandem Movie Awards 2025
           </h1>
           <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto">
             Search and add movies you&apos;ve watched with friends. Movies need
@@ -179,6 +191,11 @@ export default function Home() {
             Suggested Movies
           </h2>
           
+          {/* Stats Dashboard */}
+          {!isLoading && (
+            <StatsDashboard movies={movies} filters={filters} />
+          )}
+          
           {/* Filter Panel */}
           <FilterPanel
             users={users}
@@ -203,8 +220,6 @@ export default function Home() {
             />
           )}
         </div>
-
-        <Footer />
       </div>
 
       {selectedMovie && users.length > 0 && (

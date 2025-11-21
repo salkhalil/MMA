@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [password, setPassword] = useState('');
@@ -38,6 +39,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] p-4">
       <div className="w-full max-w-md bg-[var(--card-bg)] rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-800 animate-fade-in-up">
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/logo.png"
+            alt="Mandem Movies"
+            width={120}
+            height={120}
+            className="w-24 h-24"
+            priority
+          />
+        </div>
         <h1 className="text-2xl font-bold text-center mb-6 text-[var(--text-primary)]">
           Mandem Movies
         </h1>
