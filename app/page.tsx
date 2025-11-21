@@ -38,9 +38,15 @@ export default function Home() {
     try {
       const response = await fetch("/api/movies/list");
       const data = await response.json();
-      setMovies(data);
+      if (Array.isArray(data)) {
+        setMovies(data);
+      } else {
+        console.error("Invalid response format:", data);
+        setMovies([]);
+      }
     } catch (error) {
       console.error("Error fetching movies:", error);
+      setMovies([]);
     } finally {
       setIsLoading(false);
     }
