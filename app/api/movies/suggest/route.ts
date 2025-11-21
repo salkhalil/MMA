@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 interface SuggestMovieRequest {
   tmdbId: number;
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!tmdbId || !title || !viewerIds || viewerIds.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -31,8 +31,10 @@ export async function POST(request: NextRequest) {
     if (movie) {
       // Movie exists, add new viewers if they haven't seen it yet
       const currentMovie = movie;
-      const existingViewerIds = movie.movieViews.map(mv => mv.userId);
-      const newViewerIds = viewerIds.filter((id: number) => !existingViewerIds.includes(id));
+      const existingViewerIds = movie.movieViews.map((mv) => mv.userId);
+      const newViewerIds = viewerIds.filter(
+        (id: number) => !existingViewerIds.includes(id)
+      );
 
       if (newViewerIds.length > 0) {
         await prisma.movieView.createMany({
@@ -77,13 +79,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(movie);
   } catch (error: unknown) {
-    console.error('Error suggesting movie:', error);
+    console.error("Error suggesting movie:", error);
     return NextResponse.json(
-      { error: 'Failed to suggest movie' },
+      { error: "Failed to suggest movie" },
       { status: 500 }
     );
   }
 }
-
-
-

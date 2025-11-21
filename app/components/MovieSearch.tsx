@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { TMDBMovie } from '@/types';
-import MovieCard from './MovieCard';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useToast } from '@/app/context/ToastContext';
+import { useState, useEffect, useRef } from "react";
+import { TMDBMovie } from "@/types";
+import MovieCard from "./MovieCard";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useToast } from "@/app/context/ToastContext";
 
 interface MovieSearchProps {
   onMovieSelect: (movie: TMDBMovie) => void;
@@ -16,7 +16,7 @@ interface MovieSearchResponse {
 }
 
 export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
   const [results, setResults] = useState<TMDBMovie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -36,16 +36,18 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       setHasSearched(true);
 
       try {
-        const response = await fetch(`/api/movies/search?query=${encodeURIComponent(debouncedQuery)}`);
+        const response = await fetch(
+          `/api/movies/search?query=${encodeURIComponent(debouncedQuery)}`
+        );
         const data = (await response.json()) as MovieSearchResponse;
 
         if (response.ok) {
           setResults(data.results || []);
         } else {
-          console.error('Search error:', data.error);
+          console.error("Search error:", data.error);
         }
       } catch (error: unknown) {
-        console.error('Error searching movies:', error);
+        console.error("Error searching movies:", error);
       } finally {
         setIsSearching(false);
       }
@@ -55,7 +57,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
   }, [debouncedQuery]);
 
   const handleClear = () => {
-    setQuery('');
+    setQuery("");
     setResults([]);
     setHasSearched(false);
     inputRef.current?.focus();
@@ -63,7 +65,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
 
   const handleSelect = (movie: TMDBMovie) => {
     onMovieSelect(movie);
-    showToast(`Added "${movie.title}" to suggestions`, 'success');
+    showToast(`Added "${movie.title}" to suggestions`, "success");
     handleClear();
   };
 
@@ -71,16 +73,21 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
     <div className="w-full max-w-4xl mx-auto">
       <div className="relative mb-8 group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg 
-            className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200"
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
-        
+
         <input
           ref={inputRef}
           type="text"
@@ -99,8 +106,18 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
               className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors duration-200"
               aria-label="Clear search"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           ) : null}
@@ -110,8 +127,12 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       {!isSearching && hasSearched && results.length === 0 && (
         <div className="text-center py-12 animate-fade-in-up">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-          <p className="text-gray-600">We couldn't find any movies matching "{query}"</p>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            No results found
+          </h3>
+          <p className="text-gray-600">
+            We couldn't find any movies matching "{query}"
+          </p>
         </div>
       )}
 
@@ -119,7 +140,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
         <div className="animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">
-              Found {results.length} result{results.length !== 1 ? 's' : ''}
+              Found {results.length} result{results.length !== 1 ? "s" : ""}
             </h3>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -136,4 +157,3 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
     </div>
   );
 }
-

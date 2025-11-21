@@ -10,10 +10,7 @@ export async function DELETE(
     const movieId = parseInt(id);
 
     if (isNaN(movieId)) {
-      return NextResponse.json(
-        { error: "Invalid movie ID" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid movie ID" }, { status: 400 });
     }
 
     await prisma.movie.delete({

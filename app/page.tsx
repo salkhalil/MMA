@@ -6,6 +6,7 @@ import AddMovieModal from "./components/AddMovieModal";
 import SuggestedMoviesList from "./components/SuggestedMoviesList";
 import UserSelector from "./components/UserSelector";
 import Footer from "./components/Footer";
+import FilterPanel, { FilterOptions } from "./components/FilterPanel";
 import { TMDBMovie, User, Movie, MovieSuggestionData } from "@/types";
 
 export default function Home() {
@@ -14,6 +15,14 @@ export default function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<TMDBMovie | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    searchText: '',
+    selectedViewerIds: [],
+    minYear: null,
+    maxYear: null,
+    sortBy: 'year-newest',
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -169,6 +178,16 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-5 text-gray-900">
             Suggested Movies
           </h2>
+          
+          {/* Filter Panel */}
+          <FilterPanel
+            users={users}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isOpen={isFilterOpen}
+            onToggle={() => setIsFilterOpen(!isFilterOpen)}
+          />
+
           {isLoading ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -180,6 +199,7 @@ export default function Home() {
               currentUserId={currentUserId}
               onAddViewer={handleAddViewer}
               onDelete={handleDeleteMovie}
+              filters={filters}
             />
           )}
         </div>
