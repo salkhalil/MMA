@@ -7,26 +7,24 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model User {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique
-  createdAt DateTime    @default(now())
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  createdAt  DateTime    @default(now())
   movieViews MovieView[]
 }
 
 model Movie {
-  id          Int         @id @default(autoincrement())
-  tmdbId      Int         @unique
-  title       String
-  year        Int?
-  posterPath  String?
-  overview    String?
-  createdAt   DateTime    @default(now())
-  movieViews  MovieView[]
+  id         Int         @id @default(autoincrement())
+  tmdbId     Int         @unique
+  title      String
+  year       Int?
+  posterPath String?
+  overview   String?
+  createdAt  DateTime    @default(now())
+  movieViews MovieView[]
 }
 
 model MovieView {
@@ -34,9 +32,9 @@ model MovieView {
   movieId   Int
   userId    Int
   createdAt DateTime @default(now())
-  
-  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([movieId, userId])
 }
