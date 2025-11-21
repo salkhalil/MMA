@@ -108,48 +108,59 @@ function MovieListItem({ movie, currentUserId, onAddViewer, onDelete }: MovieLis
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-200 p-5 border-l-4 ${
-        movie.isValid ? 'border-green-500' : 'border-orange-500'
+      className={`group bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 p-4 border border-gray-100 dark:border-slate-700 ${
+        movie.isValid ? 'border-l-4 border-l-green-500 dark:border-l-green-500' : 'border-l-4 border-l-orange-500 dark:border-l-orange-500'
       }`}
     >
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-5">
         {posterUrl && (
-          <div className="relative w-full sm:w-20 h-28 sm:h-28 flex-shrink-0 rounded overflow-hidden">
+          <div className="relative w-full sm:w-24 h-36 sm:h-36 flex-shrink-0 rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition-shadow">
             <Image src={posterUrl} alt={movie.title} fill className="object-cover" />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <h4 className="font-semibold text-lg line-clamp-1">{movie.title}</h4>
-          {movie.year && <p className="text-gray-600 text-sm">{movie.year}</p>}
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <h4 className="font-bold text-xl text-gray-900 dark:text-white leading-tight mb-1">{movie.title}</h4>
+              {movie.year && <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">{movie.year}</p>}
+            </div>
+            {movie.isValid && (
+               <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+                 Eligible
+               </span>
+            )}
+          </div>
           
-          <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
+          <div className="mt-4 flex items-center gap-2 flex-wrap">
+            <span className="text-sm font-medium text-gray-500 dark:text-slate-400">
               {movie.viewerCount} viewer{movie.viewerCount !== 1 ? 's' : ''}:
             </span>
             {movie.viewers?.map((viewer) => (
               <span
                 key={viewer.id}
-                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                className="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-md border border-blue-100 dark:border-blue-800/30"
               >
                 {viewer.name}
               </span>
             ))}
           </div>
 
-          {!currentUserHasSeen && (
+          <div className="mt-auto pt-4 flex items-center gap-3">
+            {!currentUserHasSeen && (
+              <button
+                onClick={handleAddSelf}
+                className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
+              >
+                + I've seen this too
+              </button>
+            )}
             <button
-              onClick={handleAddSelf}
-              className="mt-3 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              onClick={handleDelete}
+              className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 transition-all duration-200 active:scale-95 ml-auto sm:ml-0"
             >
-              + I've seen this too
+              Delete
             </button>
-          )}
-          <button
-            onClick={handleDelete}
-            className="mt-3 ml-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-all duration-200"
-          >
-            Delete
-          </button>
+          </div>
         </div>
       </div>
     </div>
