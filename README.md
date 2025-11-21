@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎬 Movie Awards App
 
-## Getting Started
+A Next.js application for tracking movies watched with friends and organizing your own movie awards show! Movies need to be watched by at least 2 people to be eligible for awards.
 
-First, run the development server:
+## Features
+
+- 🔍 **Movie Search**: Search for any movie using The Movie Database (TMDB) API
+- 👥 **Friend Tracking**: Track which friends have watched each movie
+- ✅ **Award Eligibility**: Automatic validation that movies have been seen by 2+ people
+- 📊 **Organized Lists**: Separate views for valid award candidates and movies needing more viewers
+- 🎨 **Modern UI**: Beautiful, responsive design with Tailwind CSS
+
+## Tech Stack
+
+- **Framework**: Next.js 16 with TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: SQLite with Prisma ORM
+- **Movie Data**: TMDB API
+
+## Setup Instructions
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Get TMDB API Key
+
+1. Go to [The Movie Database](https://www.themoviedb.org/)
+2. Create a free account
+3. Go to Settings → API
+4. Request an API key (choose "Developer" option)
+5. Copy your API key
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+DATABASE_URL="file:./dev.db"
+TMDB_API_KEY="your_api_key_here"
+```
+
+Replace `your_api_key_here` with your actual TMDB API key.
+
+### 4. Setup Database
+
+The database is already initialized! But if you need to reset it:
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+### 5. Customize Friends List
+
+Edit `prisma/seed.ts` to add your friends' names, then run:
+
+```bash
+npm run db:seed
+```
+
+### 6. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Select Your User**: Choose your name from the dropdown at the top
+2. **Search for Movies**: Use the search bar to find movies
+3. **Add Movies**: Click on a movie and select which friends watched it with you
+4. **Track Progress**: See which movies are eligible for awards (2+ viewers)
+5. **Add Yourself**: Found a movie someone else added? Click "I've seen this too"
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+├── app/
+│   ├── api/
+│   │   ├── movies/
+│   │   │   ├── search/     # TMDB search proxy
+│   │   │   ├── suggest/    # Add movies & viewers
+│   │   │   └── list/       # Get all suggested movies
+│   │   └── users/          # Get all friends
+│   ├── components/
+│   │   ├── MovieCard.tsx
+│   │   ├── MovieSearch.tsx
+│   │   ├── AddMovieModal.tsx
+│   │   ├── SuggestedMoviesList.tsx
+│   │   └── UserSelector.tsx
+│   └── page.tsx            # Main application page
+├── lib/
+│   ├── prisma.ts           # Prisma client
+│   └── tmdb.ts             # TMDB API helpers
+├── prisma/
+│   ├── schema.prisma       # Database schema
+│   └── seed.ts             # Seed friends
+└── types/
+    └── index.ts            # TypeScript types
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Database Schema
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **User**: Friends who can vote (name)
+- **Movie**: Movies from TMDB (title, year, poster, etc.)
+- **MovieView**: Junction table tracking who watched what
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run db:push` - Update database schema
+- `npm run db:seed` - Seed database with friends
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Enhancements
+
+- Voting system for award categories
+- Award ceremony results page
+- Movie filtering and sorting
+- Statistics and analytics
+- Export results
+
+## License
+
+MIT
