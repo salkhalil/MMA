@@ -16,7 +16,8 @@ export default function SuggestedMoviesList({
   onAddViewer,
   onDelete,
 }: SuggestedMoviesListProps) {
-  if (movies.length === 0) {
+  // Ensure movies is an array
+  if (!Array.isArray(movies) || movies.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-6xl mb-4">🎬</div>
