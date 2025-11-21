@@ -56,13 +56,18 @@ export default function FilterPanel({
       {/* Toggle Button */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+        className="w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-all duration-200 shadow-sm hover:shadow-md"
+        style={{ 
+          background: "linear-gradient(to right, var(--background-secondary), var(--card-bg))",
+          borderColor: "var(--card-border)"
+        }}
       >
         <div className="flex items-center gap-3">
           <svg
-            className={`w-5 h-5 text-blue-600 dark:text-blue-400 transition-transform duration-300 ${
+            className={`w-5 h-5 transition-transform duration-300 ${
               isOpen ? 'rotate-180' : ''
             }`}
+            style={{ color: "var(--primary)" }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -74,16 +79,16 @@ export default function FilterPanel({
               d="M19 9l-7 7-7-7"
             />
           </svg>
-          <span className="font-semibold text-gray-900 dark:text-white">
+          <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
             Filters & Sorting
           </span>
           {activeFilterCount > 0 && (
-            <span className="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="text-white text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--primary)" }}>
               {activeFilterCount}
             </span>
           )}
         </div>
-        <span className="text-sm text-gray-600 dark:text-gray-400">
+        <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
           {isOpen ? 'Hide' : 'Show'}
         </span>
       </button>
