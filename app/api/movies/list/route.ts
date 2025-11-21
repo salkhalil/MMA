@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+type MovieWithViews = Prisma.MovieGetPayload<{
+  include: {
+    movieViews: {
+      include: {
+        user: true;
+      };
+    };
+  };
+}>;
 
 export async function GET() {
   try {
@@ -15,7 +26,7 @@ export async function GET() {
     });
 
     // Transform data to include viewer count and valid status
-    const moviesWithStats = movies.map((movie) => ({
+    const moviesWithStats = movies.map((movie: MovieWithViews) => ({
       ...movie,
       viewerCount: movie.movieViews.length,
       isValid: movie.movieViews.length >= 2,
