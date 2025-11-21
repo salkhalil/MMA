@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+interface SuggestMovieRequest {
+  tmdbId: number;
+  title: string;
+  year?: number;
+  posterPath?: string | null;
+  overview?: string;
+  viewerIds: number[];
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as SuggestMovieRequest;
     const { tmdbId, title, year, posterPath, overview, viewerIds } = body;
 
     if (!tmdbId || !title || !viewerIds || viewerIds.length === 0) {

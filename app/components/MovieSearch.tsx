@@ -10,6 +10,11 @@ interface MovieSearchProps {
   onMovieSelect: (movie: TMDBMovie) => void;
 }
 
+interface MovieSearchResponse {
+  results: TMDBMovie[];
+  error?: string;
+}
+
 export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 500);
@@ -32,7 +37,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
 
       try {
         const response = await fetch(`/api/movies/search?query=${encodeURIComponent(debouncedQuery)}`);
-        const data = await response.json();
+        const data = (await response.json()) as MovieSearchResponse;
 
         if (response.ok) {
           setResults(data.results || []);
