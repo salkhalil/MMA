@@ -62,14 +62,15 @@ export default function AddMovieModal({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)', zIndex: 9999 }}>
-      <div className="bg-white rounded-2xl max-w-2xl w-full my-8 shadow-2xl">
+    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto z-[9999]">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full my-8 shadow-2xl relative z-10 transform transition-all border border-gray-100 dark:border-slate-700">
         <div className="p-6 sm:p-8">
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Add Movie</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Add Movie</h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-3xl leading-none transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-3xl leading-none transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700"
               aria-label="Close"
             >
               ×
@@ -78,7 +79,7 @@ export default function AddMovieModal({
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-8">
             {posterUrl && (
-              <div className="relative w-full sm:w-40 h-60 flex-shrink-0 rounded-lg overflow-hidden shadow-md">
+              <div className="relative w-full sm:w-40 h-60 flex-shrink-0 rounded-lg overflow-hidden shadow-lg">
                 <Image
                   src={posterUrl}
                   alt={movie.title}
@@ -88,49 +89,55 @@ export default function AddMovieModal({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-900">{movie.title}</h3>
-              {year && <p className="text-gray-600 mb-3 font-medium">Year: {year}</p>}
-              <p className="text-gray-700 text-sm leading-relaxed line-clamp-4">{movie.overview}</p>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white leading-tight">{movie.title}</h3>
+              {year && <p className="text-gray-600 dark:text-slate-400 mb-4 font-medium text-lg">Year: {year}</p>}
+              <p className="text-gray-700 dark:text-slate-300 text-base leading-relaxed line-clamp-4">{movie.overview}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <h4 className="font-semibold mb-4 text-lg text-gray-900">Who watched this movie?</h4>
+            <div className="mb-8">
+              <h4 className="font-bold mb-4 text-lg text-gray-900 dark:text-white">Who watched this movie?</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {users.map((user) => (
                   <label
                     key={user.id}
                     className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
                       selectedUserIds.includes(user.id)
-                        ? 'border-blue-500 bg-blue-50 shadow-sm'
-                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-sm'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 shadow-sm'
+                        : 'border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-gray-50 dark:hover:bg-slate-700/50'
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={selectedUserIds.includes(user.id)}
                       onChange={() => toggleUser(user.id)}
-                      className="mr-3"
+                      className="mr-3 w-5 h-5 text-blue-600 rounded focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600"
                     />
-                    <span className="font-medium text-gray-900 text-base">{user.name}</span>
+                    <span className={`font-medium text-base ${
+                      selectedUserIds.includes(user.id) 
+                        ? 'text-blue-900 dark:text-blue-100' 
+                        : 'text-gray-700 dark:text-slate-300'
+                    }`}>
+                      {user.name}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
+            <div className="flex gap-3 justify-end pt-6 border-t border-gray-100 dark:border-slate-700">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-5 py-2.5 text-gray-700 font-medium border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+                className="px-6 py-3 text-gray-700 dark:text-slate-300 font-medium border border-gray-300 dark:border-slate-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 hover:border-gray-400 dark:hover:border-slate-500 transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || selectedUserIds.length === 0}
-                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg disabled:shadow-none"
+                className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:shadow-none disabled:translate-y-0"
               >
                 {isSubmitting ? 'Adding...' : 'Add Movie'}
               </button>
