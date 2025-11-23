@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "Mandmem Movie Awards",
   description: "Fook Oscar",
   metadataBase: new URL("https://mma.salkhalil.com"),
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 import { ToastProvider } from "@/app/context/ToastContext";

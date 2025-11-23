@@ -68,6 +68,12 @@ function Navigation() {
               >
                 Mandem Awards
               </h1>
+              <p
+                className="text-xs font-medium"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Who the fook is Oscar?
+              </p>
             </div>
           </Link>
 
