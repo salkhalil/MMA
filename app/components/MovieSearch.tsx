@@ -18,6 +18,7 @@ interface MovieSearchProps {
   ) => Promise<void>;
   currentUserId?: number;
   currentUserLetterboxdUrl?: string;
+  hideImport?: boolean;
 }
 
 interface MovieSearchResponse {
@@ -32,8 +33,11 @@ export default function MovieSearch({
   onToggleSeen,
   currentUserId,
   currentUserLetterboxdUrl,
+  hideImport = false,
 }: MovieSearchProps) {
-  const [activeTab, setActiveTab] = useState<"search" | "import">("import");
+  const [activeTab, setActiveTab] = useState<"search" | "import">(
+    hideImport ? "search" : "import"
+  );
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
   const [results, setResults] = useState<TMDBMovie[]>([]);
@@ -91,50 +95,52 @@ export default function MovieSearch({
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="flex justify-center mb-8">
-        <div
-          className="relative inline-flex p-1.5 rounded-2xl shadow-inner"
-          style={{
-            backgroundColor: "var(--bg-primary)",
-            border: "2px solid var(--card-border)",
-          }}
-        >
-          {/* Sliding background indicator */}
+      {!hideImport && (
+        <div className="flex justify-center mb-8">
           <div
-            className="absolute top-1.5 bottom-1.5 rounded-xl transition-all duration-300 ease-out shadow-lg"
+            className="relative inline-flex p-1.5 rounded-2xl shadow-inner"
             style={{
-              backgroundColor: "var(--primary)",
-              left: activeTab === "import" ? "6px" : "50%",
-              right: activeTab === "search" ? "6px" : "50%",
+              backgroundColor: "var(--bg-primary)",
+              border: "2px solid var(--card-border)",
             }}
-          />
+          >
+            {/* Sliding background indicator */}
+            <div
+              className="absolute top-1.5 bottom-1.5 rounded-xl transition-all duration-300 ease-out shadow-lg"
+              style={{
+                backgroundColor: "var(--primary)",
+                left: activeTab === "import" ? "6px" : "50%",
+                right: activeTab === "search" ? "6px" : "50%",
+              }}
+            />
 
-          <button
-            onClick={() => setActiveTab("import")}
-            className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
-              activeTab === "import"
-                ? "text-white scale-105"
-                : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
-            }`}
-          >
-            <span className="text-xl">📚</span>
-            <span>Letterboxd</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("search")}
-            className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
-              activeTab === "search"
-                ? "text-white scale-105"
-                : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
-            }`}
-          >
-            <span className="text-xl">🔍</span>
-            <span>Search</span>
-          </button>
+            <button
+              onClick={() => setActiveTab("import")}
+              className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
+                activeTab === "import"
+                  ? "text-white scale-105"
+                  : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
+              }`}
+            >
+              <span className="text-xl">📚</span>
+              <span>Letterboxd</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("search")}
+              className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
+                activeTab === "search"
+                  ? "text-white scale-105"
+                  : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
+              }`}
+            >
+              <span className="text-xl">🔍</span>
+              <span>Search</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {activeTab === "search" ? (
+      {hideImport || activeTab === "search" ? (
         <>
           <div className="relative mb-8 group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

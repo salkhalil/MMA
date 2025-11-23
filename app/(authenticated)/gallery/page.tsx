@@ -162,9 +162,32 @@ export default function GalleryPage() {
             className="text-base sm:text-lg"
             style={{ color: "var(--text-secondary)" }}
           >
-            Discover, search, and explore all our films
+            Here&apos;s what we&apos;ve watched so far, try to watch all you
+            haven&apos;t seen!
           </p>
         </header>
+
+        {/* Stats Dashboard */}
+        {!isLoading && movies.length > 0 && (
+          <section className="animate-fade-in-up">
+            <StatsDashboard
+              movies={movies}
+              filters={filters}
+              currentUserId={currentUserId!}
+            />
+          </section>
+        )}
+
+        {/* Filter Section */}
+        <section>
+          <FilterPanel
+            users={users}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isOpen={isFilterOpen}
+            onToggle={() => setIsFilterOpen(!isFilterOpen)}
+          />
+        </section>
 
         {/* Search Section */}
         <section
@@ -183,26 +206,9 @@ export default function GalleryPage() {
             onToggleSeen={handleToggleSeen}
             currentUserId={currentUserId!}
             currentUserLetterboxdUrl={currentUser?.letterboxdUrl}
+            hideImport={true}
           />
         </section>
-
-        {/* Filter Section */}
-        <section>
-          <FilterPanel
-            users={users}
-            filters={filters}
-            onFiltersChange={setFilters}
-            isOpen={isFilterOpen}
-            onToggle={() => setIsFilterOpen(!isFilterOpen)}
-          />
-        </section>
-
-        {/* Stats Dashboard */}
-        {!isLoading && movies.length > 0 && (
-          <section className="animate-fade-in-up">
-            <StatsDashboard movies={movies} filters={filters} />
-          </section>
-        )}
 
         {/* Movies List Section */}
         <section
@@ -219,15 +225,8 @@ export default function GalleryPage() {
               className="text-2xl font-bold"
               style={{ color: "var(--text-primary)" }}
             >
-              All Movies
+              All Movies ({movies.length})
             </h2>
-            <p
-              className="text-sm mt-1"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {movies.length} {movies.length === 1 ? "film" : "films"} in our
-              collection
-            </p>
           </div>
 
           {isLoading ? (
@@ -258,4 +257,3 @@ export default function GalleryPage() {
     </main>
   );
 }
-
