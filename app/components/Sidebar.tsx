@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import UserSelector from "./UserSelector";
 import FilterPanel, { FilterOptions } from "./FilterPanel";
 import { User } from "@/types";
 
@@ -74,17 +73,6 @@ export default function Sidebar({
         style={{ height: "100vh" }}
       >
         <div className="p-6 space-y-8">
-          {/* User Selector */}
-          {users.length > 0 && currentUserId && (
-            <div className="space-y-2">
-              <UserSelector
-                users={users}
-                currentUserId={currentUserId}
-                onUserChange={onUserChange}
-              />
-            </div>
-          )}
-
           {/* Filter Panel */}
           <div className="space-y-2">
             <FilterPanel

@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import { ToastProvider } from "@/app/context/ToastContext";
+import { UserProvider } from "@/app/context/UserContext";
 
 export default function RootLayout({
   children,
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ToastProvider>{children}</ToastProvider>
+        <UserProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </UserProvider>
       </body>
     </html>
   );
