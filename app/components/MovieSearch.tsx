@@ -10,6 +10,13 @@ import LetterboxdImport from "./LetterboxdImport";
 interface MovieSearchProps {
   onMovieSelect: (movie: TMDBMovie) => void;
   existingMovies?: Movie[];
+  enableScrolling?: boolean;
+  onToggleSeen?: (
+    tmdbId: number,
+    userId: number,
+    hasSeen: boolean
+  ) => Promise<void>;
+  currentUserId?: number;
 }
 
 interface MovieSearchResponse {
@@ -17,8 +24,14 @@ interface MovieSearchResponse {
   error?: string;
 }
 
-export default function MovieSearch({ onMovieSelect, existingMovies = [] }: MovieSearchProps) {
-  const [activeTab, setActiveTab] = useState<"search" | "import">("search");
+export default function MovieSearch({
+  onMovieSelect,
+  existingMovies = [],
+  enableScrolling = false,
+  onToggleSeen,
+  currentUserId,
+}: MovieSearchProps) {
+  const [activeTab, setActiveTab] = useState<"search" | "import">("import");
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
   const [results, setResults] = useState<TMDBMovie[]>([]);
@@ -40,7 +53,7 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
 
       try {
         const response = await fetch(
-          '/api/movies/search?query=' + encodeURIComponent(debouncedQuery)
+          "/api/movies/search?query=" + encodeURIComponent(debouncedQuery)
         );
         const data = (await response.json()) as MovieSearchResponse;
 
@@ -77,26 +90,44 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex justify-center mb-8">
-        <div className="bg-[var(--card-bg)] p-1 rounded-xl border border-[var(--card-border)] inline-flex">
-          <button
-            onClick={() => setActiveTab("search")}
-            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-              activeTab === "search"
-                ? "bg-[var(--primary)] text-white shadow-md"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            }`}
-          >
-            Search
-          </button>
+        <div
+          className="relative inline-flex p-1.5 rounded-2xl shadow-inner"
+          style={{
+            backgroundColor: "var(--bg-primary)",
+            border: "2px solid var(--card-border)",
+          }}
+        >
+          {/* Sliding background indicator */}
+          <div
+            className="absolute top-1.5 bottom-1.5 rounded-xl transition-all duration-300 ease-out shadow-lg"
+            style={{
+              backgroundColor: "var(--primary)",
+              left: activeTab === "import" ? "6px" : "50%",
+              right: activeTab === "search" ? "6px" : "50%",
+            }}
+          />
+
           <button
             onClick={() => setActiveTab("import")}
-            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+            className={`relative z-10 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
               activeTab === "import"
-                ? "bg-[var(--primary)] text-white shadow-md"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                ? "text-white scale-105"
+                : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
             }`}
           >
-            Import from Letterboxd
+            <span className="text-xl">📚</span>
+            <span>Import from Letterboxd</span>
+          </button>
+          <button
+            onClick={() => setActiveTab("search")}
+            className={`relative z-10 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+              activeTab === "search"
+                ? "text-white scale-105"
+                : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
+            }`}
+          >
+            <span className="text-xl">🔍</span>
+            <span>Search</span>
           </button>
         </div>
       </div>
@@ -107,7 +138,7 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg
                 className="h-5 w-5 transition-colors duration-200"
-                style={{ color: "var(--text-tertiary)" }}
+                style={{ color: "--text-tertiary" }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -176,7 +207,7 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
                 No results found
               </h3>
               <p style={{ color: "var(--text-secondary)" }}>
-                We couldn't find any movies matching "{query}"
+                We couldn&apos;t find any movies matching &quot;{query}&quot;
               </p>
             </div>
           )}
@@ -191,7 +222,13 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
                   Found {results.length} result{results.length !== 1 ? "s" : ""}
                 </h3>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              <div
+                className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 ${
+                  enableScrolling
+                    ? "max-h-[600px] overflow-y-auto pr-2 custom-scrollbar"
+                    : ""
+                }`}
+              >
                 {results.map((movie) => (
                   <MovieCard
                     key={movie.id}
@@ -204,7 +241,13 @@ export default function MovieSearch({ onMovieSelect, existingMovies = [] }: Movi
           )}
         </>
       ) : (
-        <LetterboxdImport onMovieSelect={handleSelect} existingMovies={existingMovies} />
+        <LetterboxdImport
+          onMovieSelect={handleSelect}
+          existingMovies={existingMovies}
+          enableScrolling={enableScrolling}
+          onToggleSeen={onToggleSeen}
+          currentUserId={currentUserId}
+        />
       )}
     </div>
   );

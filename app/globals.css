@@ -4,44 +4,45 @@
   /* Backgrounds */
   --background: #faf8ff;
   --background-secondary: #f3f0ff;
+  --bg-primary: #f9fafb;
   --foreground: #1a1625;
-  
+
   /* Primary - Rich Purple (Cinema/Awards theme) */
   --primary: #7c3aed;
   --primary-hover: #6d28d9;
   --primary-light: #a78bfa;
   --primary-dark: #5b21b6;
-  
+
   /* Accent - Warm Pink/Rose */
   --accent: #ec4899;
   --accent-hover: #db2777;
   --accent-light: #f9a8d4;
-  
+
   /* Secondary - Teal */
   --secondary: #14b8a6;
   --secondary-hover: #0d9488;
   --secondary-light: #5eead4;
-  
+
   /* Card & Surface */
   --card-bg: #ffffff;
   --card-border: #e9d5ff;
   --card-shadow: rgba(124, 58, 237, 0.1);
-  
+
   /* Text */
   --text-primary: #1a1625;
   --text-secondary: #4b5563;
   --text-tertiary: #9ca3af;
-  
+
   /* Success & Warning */
   --success: #10b981;
   --success-light: #d1fae5;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
-  
+
   /* Danger */
   --danger: #ef4444;
   --danger-light: #fee2e2;
-  
+
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
   --gradient-secondary: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
@@ -61,44 +62,45 @@
     /* Backgrounds */
     --background: #0f0a1a;
     --background-secondary: #1a1625;
+    --bg-primary: #111827;
     --foreground: #f8f7fc;
-    
+
     /* Primary - Adjusted for dark mode */
     --primary: #a78bfa;
     --primary-hover: #c4b5fd;
     --primary-light: #ddd6fe;
     --primary-dark: #7c3aed;
-    
+
     /* Accent */
     --accent: #f472b6;
     --accent-hover: #f9a8d4;
     --accent-light: #fbcfe8;
-    
+
     /* Secondary */
     --secondary: #2dd4bf;
     --secondary-hover: #5eead4;
     --secondary-light: #99f6e4;
-    
+
     /* Card & Surface */
     --card-bg: #1e1830;
     --card-border: #2e2440;
     --card-shadow: rgba(167, 139, 250, 0.2);
-    
+
     /* Text */
     --text-primary: #f8f7fc;
     --text-secondary: #c4b5e8;
     --text-tertiary: #8b80a8;
-    
+
     /* Success & Warning */
     --success: #34d399;
     --success-light: #064e3b;
     --warning: #fbbf24;
     --warning-light: #78350f;
-    
+
     /* Danger */
     --danger: #f87171;
     --danger-light: #7f1d1d;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
     --gradient-secondary: linear-gradient(135deg, #2dd4bf 0%, #38bdf8 100%);
@@ -184,4 +186,28 @@ input[type="checkbox"]:focus {
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Custom scale utilities */
+.scale-102 {
+  transform: scale(1.02);
 }

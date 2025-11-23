@@ -22,6 +22,7 @@ export interface MovieView {
   id: number;
   movieId: number;
   userId: number;
+  hasSeen: boolean;
   createdAt: string;
   user?: User;
 }

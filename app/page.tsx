@@ -133,6 +133,29 @@ export default function Home() {
     }
   };
 
+  const handleToggleSeen = async (
+    tmdbId: number,
+    userId: number,
+    hasSeen: boolean
+  ) => {
+    try {
+      const response = await fetch("/api/movies/toggle-seen", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tmdbId, userId, hasSeen }),
+      });
+
+      if (response.ok) {
+        await fetchMovies();
+      } else {
+        throw new Error("Failed to toggle seen status");
+      }
+    } catch (error: unknown) {
+      console.error("Error toggling seen status:", error);
+      throw error;
+    }
+  };
+
   const handleUserSelect = (userId: number) => {
     setCurrentUserId(userId);
   };
@@ -261,7 +284,12 @@ export default function Home() {
             >
               Search & Add Movies
             </h2>
-            <MovieSearch onMovieSelect={handleMovieSelect} existingMovies={movies} />
+            <MovieSearch 
+              onMovieSelect={handleMovieSelect} 
+              existingMovies={movies} 
+              onToggleSeen={handleToggleSeen}
+              currentUserId={currentUserId}
+            />
           </div>
 
           {/* Stats & Suggested Movies Section */}
@@ -300,6 +328,7 @@ export default function Home() {
                 currentUserId={currentUserId}
                 onAddViewer={handleAddViewer}
                 onDelete={handleDeleteMovie}
+                onToggleSeen={handleToggleSeen}
                 filters={filters}
               />
             )}

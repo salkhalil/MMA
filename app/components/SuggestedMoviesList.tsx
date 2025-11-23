@@ -3,36 +3,34 @@
 import { Movie } from "@/types";
 import Image from "next/image";
 import { FilterOptions } from "./FilterPanel";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface SuggestedMoviesListProps {
   movies: Movie[];
   currentUserId: number;
   onAddViewer: (movieId: number, userId: number) => Promise<void>;
   onDelete: (movieId: number) => Promise<void>;
+  onToggleSeen: (
+    movieId: number,
+    userId: number,
+    hasSeen: boolean
+  ) => Promise<void>;
   filters?: FilterOptions;
 }
-
-const ITEMS_PER_PAGE = 12;
 
 export default function SuggestedMoviesList({
   movies,
   currentUserId,
   onAddViewer,
   onDelete,
+  onToggleSeen,
   filters,
 }: SuggestedMoviesListProps) {
   const [expandedMovieId, setExpandedMovieId] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleExpanded = (movieId: number) => {
     setExpandedMovieId(expandedMovieId === movieId ? null : movieId);
   };
-
-  // Reset pagination when filters change or movies list changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters, movies.length]);
 
   // Ensure movies is an array
   if (!Array.isArray(movies)) {
@@ -122,18 +120,12 @@ export default function SuggestedMoviesList({
     );
   }
 
-  // Calculate pagination
+  // Separate valid and invalid movies
   const totalMovies = movies.length;
   const filteredCount = filteredMovies.length;
-  const totalPages = Math.ceil(filteredCount / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedMovies = filteredMovies.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
 
-  const validMovies = paginatedMovies.filter((m) => m.isValid);
-  const invalidMovies = paginatedMovies.filter((m) => !m.isValid);
+  const validMovies = filteredMovies.filter((m) => m.isValid);
+  const invalidMovies = filteredMovies.filter((m) => !m.isValid);
 
   return (
     <div>
@@ -141,8 +133,7 @@ export default function SuggestedMoviesList({
       {filters && filteredCount < totalMovies && (
         <div className="mb-4 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            Showing <span className="font-bold">{paginatedMovies.length}</span>{" "}
-            of <span className="font-bold">{filteredCount}</span> filtered
+            Showing <span className="font-bold">{filteredCount}</span> filtered
             movies (Total: {totalMovies})
           </p>
         </div>
@@ -163,6 +154,7 @@ export default function SuggestedMoviesList({
                   currentUserId={currentUserId}
                   onAddViewer={onAddViewer}
                   onDelete={onDelete}
+                  onToggleSeen={onToggleSeen}
                   isExpanded={expandedMovieId === movie.id}
                   onToggleExpanded={() => toggleExpanded(movie.id)}
                 />
@@ -184,6 +176,7 @@ export default function SuggestedMoviesList({
                   currentUserId={currentUserId}
                   onAddViewer={onAddViewer}
                   onDelete={onDelete}
+                  onToggleSeen={onToggleSeen}
                   isExpanded={expandedMovieId === movie.id}
                   onToggleExpanded={() => toggleExpanded(movie.id)}
                 />
@@ -192,49 +185,6 @@ export default function SuggestedMoviesList({
           </div>
         )}
       </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-8 pb-4">
-          <button
-            onClick={() => {
-              setCurrentPage((p) => Math.max(1, p - 1));
-              // Scroll to top of container not window if we wanted, but window is fine for now
-              // Or we could add a ref to the scroll container.
-              // For now, let's keep window scroll top as it's safe.
-              // Actually, if it's a scrollable container, we might want to scroll IT to top.
-              // But simplicity first.
-            }}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-lg border bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
-            style={{
-              borderColor: "var(--card-border)",
-              color: "var(--text-primary)",
-            }}
-          >
-            Previous
-          </button>
-          <span
-            className="text-sm font-medium"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => {
-              setCurrentPage((p) => Math.min(totalPages, p + 1));
-            }}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-lg border bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
-            style={{
-              borderColor: "var(--card-border)",
-              color: "var(--text-primary)",
-            }}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -244,6 +194,11 @@ interface MovieListItemProps {
   currentUserId: number;
   onAddViewer: (movieId: number, userId: number) => Promise<void>;
   onDelete: (movieId: number) => Promise<void>;
+  onToggleSeen: (
+    movieId: number,
+    userId: number,
+    hasSeen: boolean
+  ) => Promise<void>;
   isExpanded: boolean;
   onToggleExpanded: () => void;
 }
@@ -253,6 +208,7 @@ function MovieListItem({
   currentUserId,
   onAddViewer,
   onDelete,
+  onToggleSeen,
   isExpanded,
   onToggleExpanded,
 }: MovieListItemProps) {
@@ -260,7 +216,13 @@ function MovieListItem({
     ? `https://image.tmdb.org/t/p/w500${movie.posterPath}`
     : null;
 
-  const currentUserHasSeen = movie.viewers?.some((v) => v.id === currentUserId);
+  const currentUserView = movie.movieViews?.find(
+    (mv) => mv.userId === currentUserId
+  );
+  const currentUserHasSeen = currentUserView?.hasSeen ?? false;
+  const isCurrentUserInViewers = movie.viewers?.some(
+    (v) => v.id === currentUserId
+  );
 
   const handleAddSelf = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -281,6 +243,18 @@ function MovieListItem({
         console.error("Error deleting movie:", error);
         alert("Failed to delete movie");
       }
+    }
+  };
+
+  const handleToggleSeen = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUserView) return;
+
+    try {
+      await onToggleSeen(movie.tmdbId, currentUserId, !currentUserHasSeen);
+    } catch (error: unknown) {
+      console.error("Error toggling seen status:", error);
+      alert("Failed to toggle seen status");
     }
   };
 
@@ -317,6 +291,18 @@ function MovieListItem({
           {movie.isValid && (
             <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
               ✓
+            </span>
+          )}
+          {isCurrentUserInViewers && (
+            <span
+              className="absolute top-2 left-2 text-2xl"
+              title={
+                currentUserHasSeen
+                  ? "You've seen this"
+                  : "You haven't seen this"
+              }
+            >
+              {currentUserHasSeen ? "👁️" : "👁️‍🗨️"}
             </span>
           )}
         </div>
@@ -389,23 +375,43 @@ function MovieListItem({
             <span className="text-base font-medium text-gray-500 dark:text-slate-400">
               {movie.viewerCount} viewer{movie.viewerCount !== 1 ? "s" : ""}:
             </span>
-            {movie.viewers?.map((viewer) => (
-              <span
-                key={viewer.id}
-                className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-sm font-semibold rounded-lg border border-blue-100 dark:border-blue-800/30"
-              >
-                {viewer.name}
-              </span>
-            ))}
+            {movie.movieViews?.map((movieView) => {
+              const viewer = movieView.user;
+              if (!viewer) return null;
+              const hasSeen = movieView.hasSeen;
+              return (
+                <span
+                  key={viewer.id}
+                  className={`px-3 py-1.5 text-sm font-semibold rounded-lg border ${
+                    hasSeen
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800/30"
+                      : "bg-gray-50 dark:bg-gray-800/20 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700/30"
+                  }`}
+                >
+                  {hasSeen ? "✓" : "✗"} {viewer.name}
+                </span>
+              );
+            })}
           </div>
 
           <div className="mt-auto flex items-center gap-3 flex-wrap">
-            {!currentUserHasSeen && (
+            {!isCurrentUserInViewers ? (
               <button
                 onClick={handleAddSelf}
                 className="px-5 py-2.5 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
               >
                 + I&apos;ve seen this too
+              </button>
+            ) : (
+              <button
+                onClick={handleToggleSeen}
+                className={`px-5 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-95 ${
+                  currentUserHasSeen
+                    ? "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
+              >
+                {currentUserHasSeen ? "Mark as Not Seen" : "Mark as Seen"}
               </button>
             )}
             <button

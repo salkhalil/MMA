@@ -82,7 +82,13 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ movies });
+    // Deduplicate movies based on letterboxdSlug
+    // Keep the first occurrence (most recent watch since diary is sorted newest first)
+    const uniqueMovies = Array.from(
+      new Map(movies.map(movie => [movie.letterboxdSlug, movie])).values()
+    );
+
+    return NextResponse.json({ movies: uniqueMovies });
   } catch (error: unknown) {
     console.error("Error scraping Letterboxd:", error);
     return NextResponse.json(

@@ -28,6 +28,7 @@ model MovieView {
   id        Int      @id @default(autoincrement())
   movieId   Int
   userId    Int
+  hasSeen   Boolean  @default(true)
   createdAt DateTime @default(now())
   movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

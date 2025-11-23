@@ -18,9 +18,12 @@ interface LetterboxdMovie {
 interface LetterboxdImportProps {
   onMovieSelect: (movie: TMDBMovie) => void;
   existingMovies?: Movie[];
+  enableScrolling?: boolean;
+  onToggleSeen?: (tmdbId: number, userId: number, hasSeen: boolean) => Promise<void>;
+  currentUserId?: number;
 }
 
-export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }: LetterboxdImportProps) {
+export default function LetterboxdImport({ onMovieSelect, existingMovies = [], enableScrolling = false, onToggleSeen, currentUserId }: LetterboxdImportProps) {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [movies, setMovies] = useState<LetterboxdMovie[]>([]);
@@ -29,6 +32,7 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
   const [resolvingMovie, setResolvingMovie] = useState<string | null>(null);
   const [tmdbPosters, setTmdbPosters] = useState<Record<string, string | null>>({});
   const [filterYear, setFilterYear] = useState(true); // Default to filtering by current year
+  const [filterAdded, setFilterAdded] = useState(false);
   const currentYear = new Date().getFullYear().toString();
 
   // Queue to fetch TMDB posters for movies that don't have one
@@ -135,8 +139,38 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
     }
   };
 
+  const getExistingMovie = (title: string): Movie | undefined => {
+    return existingMovies.find(m => m.title.toLowerCase() === title.toLowerCase());
+  };
+
   const isAlreadyAdded = (title: string) => {
     return existingMovies.some(m => m.title.toLowerCase() === title.toLowerCase());
+  };
+
+  const handleToggleSeenOnAdded = async (movie: LetterboxdMovie) => {
+    if (!onToggleSeen || !currentUserId) return;
+    
+    const existingMovie = getExistingMovie(movie.title);
+    if (!existingMovie) return;
+
+    const currentUserView = existingMovie.movieViews?.find(mv => mv.userId === currentUserId);
+    if (!currentUserView) {
+      showToast("You haven't been added as a viewer for this movie yet", "error");
+      return;
+    }
+
+    const currentHasSeen = currentUserView.hasSeen;
+    
+    try {
+      await onToggleSeen(existingMovie.tmdbId, currentUserId, !currentHasSeen);
+      showToast(
+        `Marked "${movie.title}" as ${!currentHasSeen ? "seen" : "not seen"}`,
+        "success"
+      );
+    } catch (error) {
+      console.error("Error toggling seen status:", error);
+      showToast("Failed to update seen status", "error");
+    }
   };
 
   return (
@@ -186,33 +220,58 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
             <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
               Found {movies.length} films from {username}
             </h3>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={filterYear}
-                onChange={(e) => setFilterYear(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-                Seen in {currentYear}
-              </span>
-            </label>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filterAdded}
+                  onChange={(e) => setFilterAdded(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Hide added
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filterYear}
+                  onChange={(e) => setFilterYear(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Seen in {currentYear}
+                </span>
+              </label>
+            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 ${enableScrolling ? 'max-h-[600px] overflow-y-auto pr-2 custom-scrollbar' : ''}`}>
             {movies
               .filter(m => !filterYear || (m.watchedDate && m.watchedDate.includes(currentYear)))
+              .filter(m => !filterAdded || !isAlreadyAdded(m.title))
               .map((movie) => {
               const alreadyAdded = isAlreadyAdded(movie.title);
               const tmdbPoster = tmdbPosters[movie.letterboxdSlug];
               const displayPoster = movie.posterUrl || (tmdbPoster ? `https://image.tmdb.org/t/p/w500${tmdbPoster}` : null);
+              
+              const existingMovie = getExistingMovie(movie.title);
+              const currentUserView = existingMovie?.movieViews?.find(mv => mv.userId === currentUserId);
+              const currentUserHasSeen = currentUserView?.hasSeen ?? false;
+              const canToggleSeen = alreadyAdded && onToggleSeen && currentUserId && currentUserView;
 
               return (
                 <button
                   key={movie.letterboxdSlug}
-                  onClick={() => !alreadyAdded && handleSelect(movie)}
-                  disabled={resolvingMovie === movie.letterboxdSlug || alreadyAdded}
+                  onClick={() => {
+                    if (alreadyAdded && canToggleSeen) {
+                      handleToggleSeenOnAdded(movie);
+                    } else if (!alreadyAdded) {
+                      handleSelect(movie);
+                    }
+                  }}
+                  disabled={resolvingMovie === movie.letterboxdSlug || (alreadyAdded && !canToggleSeen)}
                   className={`group relative aspect-[2/3] rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 w-full text-left ${
-                    alreadyAdded ? 'opacity-60 cursor-default' : 'hover:-translate-y-1'
+                    alreadyAdded && !canToggleSeen ? 'opacity-60 cursor-default' : 'hover:-translate-y-1'
                   }`}
                   style={{ backgroundColor: "var(--card-bg)" }}
                 >
@@ -221,7 +280,7 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
                       src={displayPoster}
                       alt={movie.title}
                       fill
-                      className={`object-cover transition-transform duration-500 ${!alreadyAdded && 'group-hover:scale-105'}`}
+                      className={`object-cover transition-transform duration-500 ${(!alreadyAdded || canToggleSeen) && 'group-hover:scale-105'}`}
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                   ) : (
@@ -254,7 +313,18 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
                     </div>
                   )}
 
-                  {alreadyAdded && (
+                  {alreadyAdded && canToggleSeen && (
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
+                      <span className="text-white font-bold px-3 py-1 rounded-full bg-green-600/80 backdrop-blur-sm text-sm">
+                        ✓ Added
+                      </span>
+                      <span className="text-white font-semibold px-4 py-2 rounded-lg bg-blue-600/80 backdrop-blur-sm text-sm">
+                        {currentUserHasSeen ? "Mark Not Seen" : "Mark Seen"}
+                      </span>
+                    </div>
+                  )}
+
+                  {alreadyAdded && !canToggleSeen && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                       <span className="text-white font-bold px-3 py-1 rounded-full bg-green-600/80 backdrop-blur-sm text-sm">
                         ✓ Added
