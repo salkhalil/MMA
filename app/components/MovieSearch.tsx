@@ -96,16 +96,19 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for a movie..."
           className="w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-200 text-lg shadow-sm hover:shadow-md focus:shadow-lg"
-          style={{ 
-            backgroundColor: "var(--card-bg)", 
-            borderColor: "var(--card-border)", 
-            color: "var(--text-primary)"
+          style={{
+            backgroundColor: "var(--card-bg)",
+            borderColor: "var(--card-border)",
+            color: "var(--text-primary)",
           }}
         />
 
         <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
           {isSearching ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: "var(--primary)" }}></div>
+            <div
+              className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent"
+              style={{ borderColor: "var(--primary)" }}
+            ></div>
           ) : query ? (
             <button
               onClick={handleClear}
@@ -134,7 +137,10 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       {!isSearching && hasSearched && results.length === 0 && (
         <div className="text-center py-12 animate-fade-in-up">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
+          <h3
+            className="text-xl font-semibold mb-2"
+            style={{ color: "var(--text-primary)" }}
+          >
             No results found
           </h3>
           <p style={{ color: "var(--text-secondary)" }}>
@@ -146,7 +152,10 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       {results.length > 0 && (
         <div className="animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+            <h3
+              className="text-lg font-semibold"
+              style={{ color: "var(--text-primary)" }}
+            >
               Found {results.length} result{results.length !== 1 ? "s" : ""}
             </h3>
           </div>

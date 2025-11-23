@@ -99,11 +99,11 @@ export default function FilterPanel({
           isOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-6 shadow-sm">
+        <div className="rounded-lg border p-6 shadow-sm" style={{ backgroundColor: "var(--card-bg)", borderColor: "var(--card-border)" }}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Search Text */}
             <div className="lg:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
                 Search by Title
               </label>
               <div className="relative">
@@ -114,10 +114,16 @@ export default function FilterPanel({
                     onFiltersChange({ ...filters, searchText: e.target.value })
                   }
                   placeholder="Type to search movies..."
-                  className="w-full px-4 py-2 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all"
+                  className="w-full px-4 py-2 pl-10 border rounded-lg focus:ring-2 focus:border-transparent transition-all"
+                  style={{ 
+                    borderColor: "var(--card-border)", 
+                    backgroundColor: "var(--background-secondary)",
+                    color: "var(--text-primary)"
+                  }}
                 />
                 <svg
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                  style={{ color: "var(--text-tertiary)" }}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -134,7 +140,7 @@ export default function FilterPanel({
 
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
                 Sort By
               </label>
               <select
@@ -145,7 +151,12 @@ export default function FilterPanel({
                     sortBy: e.target.value as FilterOptions['sortBy'],
                   })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-all"
+                style={{ 
+                  borderColor: "var(--card-border)", 
+                  backgroundColor: "var(--background-secondary)",
+                  color: "var(--text-primary)"
+                }}
               >
                 <option value="year-newest">Year (Newest)</option>
                 <option value="year-oldest">Year (Oldest)</option>
@@ -159,7 +170,11 @@ export default function FilterPanel({
               <button
                 onClick={handleClearFilters}
                 disabled={activeFilterCount === 0}
-                className="w-full px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full px-4 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                style={{ 
+                  backgroundColor: "var(--background-secondary)", 
+                  color: "var(--text-primary)"
+                }}
               >
                 Clear All
               </button>
@@ -169,7 +184,7 @@ export default function FilterPanel({
           {/* Year Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
                 Min Year
               </label>
               <input
@@ -184,12 +199,17 @@ export default function FilterPanel({
                 placeholder="e.g., 2020"
                 min="1900"
                 max={new Date().getFullYear()}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-all"
+                style={{ 
+                  borderColor: "var(--card-border)", 
+                  backgroundColor: "var(--background-secondary)",
+                  color: "var(--text-primary)"
+                }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
                 Max Year
               </label>
               <input
@@ -204,7 +224,12 @@ export default function FilterPanel({
                 placeholder="e.g., 2024"
                 min="1900"
                 max={new Date().getFullYear()}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all"
+                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent transition-all"
+                style={{ 
+                  borderColor: "var(--card-border)", 
+                  backgroundColor: "var(--background-secondary)",
+                  color: "var(--text-primary)"
+                }}
               />
             </div>
           </div>
@@ -212,7 +237,7 @@ export default function FilterPanel({
           {/* Filter by Viewers */}
           {users.length > 0 && (
             <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              <label className="block text-sm font-semibold mb-3" style={{ color: "var(--text-primary)" }}>
                 Filter by Viewers
               </label>
               <div className="flex flex-wrap gap-2">
@@ -222,11 +247,12 @@ export default function FilterPanel({
                     <button
                       key={user.id}
                       onClick={() => handleViewerToggle(user.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      className="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                      style={
                         isSelected
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                      }`}
+                          ? { background: "var(--gradient-primary)", color: "white", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }
+                          : { backgroundColor: "var(--background-secondary)", color: "var(--text-primary)" }
+                      }
                     >
                       {user.name}
                       {isSelected && (
@@ -237,7 +263,7 @@ export default function FilterPanel({
                 })}
               </div>
               {filters.selectedViewerIds.length > 0 && (
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
                   Showing movies seen by {filters.selectedViewerIds.length} selected viewer{filters.selectedViewerIds.length > 1 ? 's' : ''}
                 </p>
               )}

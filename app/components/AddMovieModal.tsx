@@ -73,15 +73,25 @@ export default function AddMovieModal({
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
-      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full my-8 shadow-2xl relative z-10 transform transition-all border border-gray-100 dark:border-slate-700">
+      <div
+        className="rounded-2xl max-w-2xl w-full my-8 shadow-2xl relative z-10 transform transition-all border"
+        style={{
+          backgroundColor: "var(--card-bg)",
+          borderColor: "var(--card-border)",
+        }}
+      >
         <div className="p-6 sm:p-8">
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            <h2
+              className="text-2xl sm:text-3xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
               Add Movie
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-3xl leading-none transition-colors p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700"
+              className="text-3xl leading-none transition-colors p-2 rounded-full"
+              style={{ color: "var(--text-tertiary)" }}
               aria-label="Close"
             >
               ×
@@ -100,15 +110,24 @@ export default function AddMovieModal({
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white leading-tight">
+              <h3
+                className="text-xl sm:text-2xl font-bold mb-2 leading-tight"
+                style={{ color: "var(--text-primary)" }}
+              >
                 {movie.title}
               </h3>
               {year && (
-                <p className="text-gray-600 dark:text-slate-400 mb-4 font-medium text-lg">
+                <p
+                  className="mb-4 font-medium text-lg"
+                  style={{ color: "var(--text-secondary)" }}
+                >
                   Year: {year}
                 </p>
               )}
-              <p className="text-gray-700 dark:text-slate-300 text-base leading-relaxed line-clamp-4">
+              <p
+                className="text-base leading-relaxed line-clamp-4"
+                style={{ color: "var(--text-secondary)" }}
+              >
                 {movie.overview}
               </p>
             </div>
@@ -116,7 +135,10 @@ export default function AddMovieModal({
 
           <form onSubmit={handleSubmit}>
             <div className="mb-8">
-              <h4 className="font-bold mb-4 text-lg text-gray-900 dark:text-white">
+              <h4
+                className="font-bold mb-4 text-lg"
+                style={{ color: "var(--text-primary)" }}
+              >
                 Who watched this movie?
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

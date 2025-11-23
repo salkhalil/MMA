@@ -3,7 +3,7 @@
 import { Movie } from "@/types";
 import Image from "next/image";
 import { FilterOptions } from "./FilterPanel";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SuggestedMoviesListProps {
   movies: Movie[];
@@ -13,6 +13,8 @@ interface SuggestedMoviesListProps {
   filters?: FilterOptions;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export default function SuggestedMoviesList({
   movies,
   currentUserId,
@@ -21,10 +23,17 @@ export default function SuggestedMoviesList({
   filters,
 }: SuggestedMoviesListProps) {
   const [expandedMovieId, setExpandedMovieId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const toggleExpanded = (movieId: number) => {
     setExpandedMovieId(expandedMovieId === movieId ? null : movieId);
   };
+
+  // Reset pagination when filters change or movies list changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, movies.length]);
+
   // Ensure movies is an array
   if (!Array.isArray(movies)) {
     return (
@@ -113,11 +122,18 @@ export default function SuggestedMoviesList({
     );
   }
 
-  const validMovies = filteredMovies.filter((m) => m.isValid);
-  const invalidMovies = filteredMovies.filter((m) => !m.isValid);
-
+  // Calculate pagination
   const totalMovies = movies.length;
   const filteredCount = filteredMovies.length;
+  const totalPages = Math.ceil(filteredCount / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedMovies = filteredMovies.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
+  const validMovies = paginatedMovies.filter((m) => m.isValid);
+  const invalidMovies = paginatedMovies.filter((m) => !m.isValid);
 
   return (
     <div>
@@ -125,51 +141,98 @@ export default function SuggestedMoviesList({
       {filters && filteredCount < totalMovies && (
         <div className="mb-4 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            Showing <span className="font-bold">{filteredCount}</span> of{" "}
-            <span className="font-bold">{totalMovies}</span> movies
+            Showing <span className="font-bold">{paginatedMovies.length}</span>{" "}
+            of <span className="font-bold">{filteredCount}</span> filtered
+            movies (Total: {totalMovies})
           </p>
         </div>
       )}
 
-      {validMovies.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 text-green-700">
-            ✓ Valid Movies for Awards ({validMovies.length})
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {validMovies.map((movie) => (
-              <MovieListItem
-                key={movie.id}
-                movie={movie}
-                currentUserId={currentUserId}
-                onAddViewer={onAddViewer}
-                onDelete={onDelete}
-                isExpanded={expandedMovieId === movie.id}
-                onToggleExpanded={() => toggleExpanded(movie.id)}
-              />
-            ))}
+      {/* Scrollable Movie List Container */}
+      <div className="h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+        {validMovies.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4 text-green-700">
+              ✓ Valid Movies for Awards ({validMovies.length})
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {validMovies.map((movie) => (
+                <MovieListItem
+                  key={movie.id}
+                  movie={movie}
+                  currentUserId={currentUserId}
+                  onAddViewer={onAddViewer}
+                  onDelete={onDelete}
+                  isExpanded={expandedMovieId === movie.id}
+                  onToggleExpanded={() => toggleExpanded(movie.id)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {invalidMovies.length > 0 && (
-        <div>
-          <h3 className="text-xl font-bold mb-4 text-orange-700">
-            ⚠ Needs More Viewers ({invalidMovies.length})
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {invalidMovies.map((movie) => (
-              <MovieListItem
-                key={movie.id}
-                movie={movie}
-                currentUserId={currentUserId}
-                onAddViewer={onAddViewer}
-                onDelete={onDelete}
-                isExpanded={expandedMovieId === movie.id}
-                onToggleExpanded={() => toggleExpanded(movie.id)}
-              />
-            ))}
+        {invalidMovies.length > 0 && (
+          <div>
+            <h3 className="text-xl font-bold mb-4 text-orange-700">
+              ⚠ Needs More Viewers ({invalidMovies.length})
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {invalidMovies.map((movie) => (
+                <MovieListItem
+                  key={movie.id}
+                  movie={movie}
+                  currentUserId={currentUserId}
+                  onAddViewer={onAddViewer}
+                  onDelete={onDelete}
+                  isExpanded={expandedMovieId === movie.id}
+                  onToggleExpanded={() => toggleExpanded(movie.id)}
+                />
+              ))}
+            </div>
           </div>
+        )}
+      </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4 mt-8 pb-4">
+          <button
+            onClick={() => {
+              setCurrentPage((p) => Math.max(1, p - 1));
+              // Scroll to top of container not window if we wanted, but window is fine for now
+              // Or we could add a ref to the scroll container.
+              // For now, let's keep window scroll top as it's safe.
+              // Actually, if it's a scrollable container, we might want to scroll IT to top.
+              // But simplicity first.
+            }}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded-lg border bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+            style={{
+              borderColor: "var(--card-border)",
+              color: "var(--text-primary)",
+            }}
+          >
+            Previous
+          </button>
+          <span
+            className="text-sm font-medium"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => {
+              setCurrentPage((p) => Math.min(totalPages, p + 1));
+            }}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 rounded-lg border bg-white dark:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
+            style={{
+              borderColor: "var(--card-border)",
+              color: "var(--text-primary)",
+            }}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>
@@ -228,7 +291,7 @@ function MovieListItem({
         onClick={onToggleExpanded}
         className="group bg-white dark:bg-slate-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left w-full border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col h-full cursor-pointer"
       >
-        <div className="relative aspect-[2/3] bg-gray-100 dark:bg-slate-700 overflow-hidden">
+        <div className="relative aspect-2/3 bg-gray-100 dark:bg-slate-700 overflow-hidden">
           {posterUrl ? (
             <Image
               src={posterUrl}
@@ -242,7 +305,7 @@ function MovieListItem({
               <span className="text-sm">No Image</span>
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-3">
             <h3 className="font-bold text-base leading-tight text-white mb-1 line-clamp-2">
               {movie.title}
