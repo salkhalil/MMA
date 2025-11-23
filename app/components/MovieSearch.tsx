@@ -109,18 +109,18 @@ export default function MovieSearch({
 
           <button
             onClick={() => setActiveTab("import")}
-            className={`relative z-10 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+            className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
               activeTab === "import"
                 ? "text-white scale-105"
                 : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"
             }`}
           >
             <span className="text-xl">📚</span>
-            <span>Import from Letterboxd</span>
+            <span>Letterboxd</span>
           </button>
           <button
             onClick={() => setActiveTab("search")}
-            className={`relative z-10 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 ${
+            className={`relative z-10 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 whitespace-nowrap min-w-[160px] ${
               activeTab === "search"
                 ? "text-white scale-105"
                 : "text-[--text-secondary] hover:text-[--text-primary] hover:scale-102"

@@ -154,12 +154,7 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
     if (!existingMovie) return;
 
     const currentUserView = existingMovie.movieViews?.find(mv => mv.userId === currentUserId);
-    if (!currentUserView) {
-      showToast("You haven't been added as a viewer for this movie yet", "error");
-      return;
-    }
-
-    const currentHasSeen = currentUserView.hasSeen;
+    const currentHasSeen = currentUserView?.hasSeen ?? false;
     
     try {
       await onToggleSeen(existingMovie.tmdbId, currentUserId, !currentHasSeen);
@@ -257,7 +252,7 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
               const existingMovie = getExistingMovie(movie.title);
               const currentUserView = existingMovie?.movieViews?.find(mv => mv.userId === currentUserId);
               const currentUserHasSeen = currentUserView?.hasSeen ?? false;
-              const canToggleSeen = alreadyAdded && onToggleSeen && currentUserId && currentUserView;
+              const canToggleSeen = alreadyAdded && onToggleSeen && currentUserId;
 
               return (
                 <button
@@ -305,6 +300,27 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
                     </div>
                   </div>
                   
+                  {/* Current user seen status indicator */}
+                  {alreadyAdded && currentUserId && (
+                    <span
+                      className="absolute top-2 left-2 text-2xl"
+                      title={
+                        currentUserHasSeen
+                          ? "You've seen this"
+                          : "You haven't seen this"
+                      }
+                    >
+                      {currentUserHasSeen ? "👁️" : "👁️‍🗨️"}
+                    </span>
+                  )}
+
+                  {/* Added badge */}
+                  {alreadyAdded && (
+                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      ✓
+                    </span>
+                  )}
+                  
                   {!alreadyAdded && (
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="text-white font-semibold px-4 py-2 rounded-lg bg-primary/80 backdrop-blur-sm">
@@ -313,19 +329,37 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
                     </div>
                   )}
 
-                  {alreadyAdded && canToggleSeen && (
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
-                      <span className="text-white font-bold px-3 py-1 rounded-full bg-green-600/80 backdrop-blur-sm text-sm">
-                        ✓ Added
-                      </span>
-                      <span className="text-white font-semibold px-4 py-2 rounded-lg bg-blue-600/80 backdrop-blur-sm text-sm">
+                  {alreadyAdded && canToggleSeen && existingMovie && (
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 p-3">
+                      {/* Viewers list */}
+                      <div className="flex flex-col gap-1.5 w-full max-h-[60%] overflow-y-auto">
+                        {existingMovie.movieViews?.map((movieView) => {
+                          const viewer = movieView.user;
+                          if (!viewer) return null;
+                          const hasSeen = movieView.hasSeen;
+                          return (
+                            <span
+                              key={viewer.id}
+                              className={`px-2 py-1 text-xs font-semibold rounded-md border backdrop-blur-sm ${
+                                hasSeen
+                                  ? "bg-green-600/90 text-white border-green-400"
+                                  : "bg-gray-600/90 text-gray-200 border-gray-400"
+                              }`}
+                            >
+                              {hasSeen ? "✓" : "✗"} {viewer.name}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      {/* Toggle button */}
+                      <span className="text-white font-semibold px-4 py-2 rounded-lg bg-blue-600/90 backdrop-blur-sm text-sm border border-blue-400">
                         {currentUserHasSeen ? "Mark Not Seen" : "Mark Seen"}
                       </span>
                     </div>
                   )}
 
                   {alreadyAdded && !canToggleSeen && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <span className="text-white font-bold px-3 py-1 rounded-full bg-green-600/80 backdrop-blur-sm text-sm">
                         ✓ Added
                       </span>
