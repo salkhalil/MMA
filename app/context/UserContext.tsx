@@ -19,6 +19,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [currentUserId, setCurrentUserIdState] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted flag after first render (client-side only)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Load user from localStorage on mount (client-side only)
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const savedUserId = localStorage.getItem("currentUserId");
+    if (savedUserId) {
+      setCurrentUserIdState(parseInt(savedUserId));
+    }
+  }, [mounted]);
 
   // Fetch users on mount
   useEffect(() => {
@@ -35,14 +51,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
     };
 
     fetchUsers();
-  }, []);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const savedUserId = localStorage.getItem("currentUserId");
-    if (savedUserId) {
-      setCurrentUserIdState(parseInt(savedUserId));
-    }
   }, []);
 
   // Save user to localStorage when it changes
