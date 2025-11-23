@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mandmem Movie Awards",
   description: "Fook Oscar",
+  metadataBase: new URL("https://mma.salkhalil.com"),
 };
 
 import { ToastProvider } from "@/app/context/ToastContext";
