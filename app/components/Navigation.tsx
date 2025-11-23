@@ -194,6 +194,14 @@ function Navigation() {
                   ))}
                 </div>
                 <div className="border-t" style={{ borderColor: "var(--card-border)" }}>
+                  <Link
+                    href="/profile"
+                    onClick={() => setShowUserMenu(false)}
+                    className="block w-full px-5 py-3 text-left text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    ⚙️ Profile Settings
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full px-5 py-3 text-left text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"

@@ -21,9 +21,10 @@ interface LetterboxdImportProps {
     enableScrolling?: boolean;
     onToggleSeen?: (tmdbId: number, userId: number, hasSeen: boolean) => Promise<void>;
     currentUserId?: number;
+    currentUserLetterboxdUrl?: string;
 }
 
-export default function LetterboxdImport({ onMovieSelect, existingMovies = [], enableScrolling = false, onToggleSeen, currentUserId }: LetterboxdImportProps) {
+export default function LetterboxdImport({ onMovieSelect, existingMovies = [], enableScrolling = false, onToggleSeen, currentUserId, currentUserLetterboxdUrl }: LetterboxdImportProps) {
     const [username, setUsername] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [movies, setMovies] = useState<LetterboxdMovie[]>([]);
@@ -34,6 +35,22 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
     const [filterYear, setFilterYear] = useState(true); // Default to filtering by current year
     const [filterAdded, setFilterAdded] = useState(false);
     const currentYear = new Date().getFullYear().toString();
+
+    // Extract username from Letterboxd URL
+    const extractUsername = (url: string): string | null => {
+        const match = url.match(/letterboxd\.com\/([a-zA-Z0-9_-]+)\/?$/);
+        return match ? match[1] : null;
+    };
+
+    // Pre-fill username from saved profile URL
+    useEffect(() => {
+        if (currentUserLetterboxdUrl && !username) {
+            const extractedUsername = extractUsername(currentUserLetterboxdUrl);
+            if (extractedUsername) {
+                setUsername(extractedUsername);
+            }
+        }
+    }, [currentUserLetterboxdUrl]);
 
     // Queue to fetch TMDB posters for movies that don't have one
     useEffect(() => {
@@ -202,6 +219,12 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [], e
                     )}
                 </button>
             </form>
+            {currentUserLetterboxdUrl && username === extractUsername(currentUserLetterboxdUrl) && (
+                <div className="mb-6 flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
+                    <span>✓</span>
+                    <span>Using your saved Letterboxd profile</span>
+                </div>
+            )}
 
             {error && (
                 <div className="text-center py-8 animate-fade-in-up">

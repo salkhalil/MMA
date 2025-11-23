@@ -7,7 +7,7 @@ import AddMovieModal from "@/app/components/AddMovieModal";
 import { TMDBMovie, Movie, MovieSuggestionData } from "@/types";
 
 export default function AddPage() {
-  const { currentUserId, users } = useUser();
+  const { currentUserId, currentUser, users } = useUser();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<TMDBMovie | null>(null);
 
@@ -119,6 +119,7 @@ export default function AddPage() {
             existingMovies={movies}
             onToggleSeen={handleToggleSeen}
             currentUserId={currentUserId!}
+            currentUserLetterboxdUrl={currentUser?.letterboxdUrl}
           />
         </div>
       </div>

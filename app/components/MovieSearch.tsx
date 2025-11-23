@@ -17,6 +17,7 @@ interface MovieSearchProps {
     hasSeen: boolean
   ) => Promise<void>;
   currentUserId?: number;
+  currentUserLetterboxdUrl?: string;
 }
 
 interface MovieSearchResponse {
@@ -30,6 +31,7 @@ export default function MovieSearch({
   enableScrolling = false,
   onToggleSeen,
   currentUserId,
+  currentUserLetterboxdUrl,
 }: MovieSearchProps) {
   const [activeTab, setActiveTab] = useState<"search" | "import">("import");
   const [query, setQuery] = useState("");
@@ -247,6 +249,7 @@ export default function MovieSearch({
           enableScrolling={enableScrolling}
           onToggleSeen={onToggleSeen}
           currentUserId={currentUserId}
+          currentUserLetterboxdUrl={currentUserLetterboxdUrl}
         />
       )}
     </div>

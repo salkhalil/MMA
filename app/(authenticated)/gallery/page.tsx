@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@/app/context/UserContext";
-import Sidebar from "@/app/components/Sidebar";
+import MovieSearch from "@/app/components/MovieSearch";
+import FilterPanel, { FilterOptions } from "@/app/components/FilterPanel";
 import SuggestedMoviesList from "@/app/components/SuggestedMoviesList";
 import StatsDashboard from "@/app/components/StatsDashboard";
-import { FilterOptions } from "@/app/components/FilterPanel";
-import { Movie } from "@/types";
+import { Movie, TMDBMovie } from "@/types";
 
 export default function GalleryPage() {
   const { currentUserId, users } = useUser();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     searchText: "",
     selectedViewerIds: [],
@@ -40,6 +41,34 @@ export default function GalleryPage() {
       setMovies([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMovieSelect = async (movie: TMDBMovie) => {
+    try {
+      const response = await fetch("/api/movies/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tmdbId: movie.id,
+          title: movie.title,
+          year: movie.release_date
+            ? parseInt(movie.release_date.split("-")[0])
+            : null,
+          posterPath: movie.poster_path,
+          overview: movie.overview,
+          viewerIds: [currentUserId],
+        }),
+      });
+
+      if (response.ok) {
+        await fetchMovies();
+      } else {
+        throw new Error("Failed to add movie");
+      }
+    } catch (error: unknown) {
+      console.error("Error adding movie:", error);
+      throw error;
     }
   };
 
@@ -111,79 +140,122 @@ export default function GalleryPage() {
     }
   };
 
+  const currentUser = users.find((u) => u.id === currentUserId);
+
   return (
-    <div className="flex flex-1 overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar
-        users={users}
-        currentUserId={currentUserId}
-        onUserChange={() => {}} // Not used anymore, handled by Navigation
-        filters={filters}
-        onFiltersChange={setFilters}
-        className="shrink-0"
-      />
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Header */}
-          <header className="text-center mb-8">
-            <h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2"
-              style={{
-                background: "var(--gradient-primary)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Movie Gallery
-            </h1>
-            <p
-              className="text-sm sm:text-base"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              All films we&apos;ve added
-            </p>
-          </header>
-
-          {/* Stats Dashboard */}
-          {!isLoading && <StatsDashboard movies={movies} filters={filters} />}
-
-          {/* Movies List Section */}
-          <div
-            className="rounded-2xl shadow-lg p-6 sm:p-8"
+    <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <header className="text-center space-y-3">
+          <h1
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold"
             style={{
-              backgroundColor: "var(--card-bg)",
-              borderWidth: "1px",
-              borderStyle: "solid",
-              borderColor: "var(--card-border)",
+              background: "var(--gradient-primary)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
             }}
           >
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div
-                  className="inline-block animate-spin rounded-full h-8 w-8 border-b-2"
-                  style={{ borderColor: "var(--primary)" }}
-                ></div>
-                <p className="mt-2" style={{ color: "var(--text-secondary)" }}>
-                  Loading...
-                </p>
-              </div>
-            ) : (
-              <SuggestedMoviesList
-                movies={movies}
-                currentUserId={currentUserId!}
-                onAddViewer={handleAddViewer}
-                onDelete={handleDeleteMovie}
-                onToggleSeen={handleToggleSeen}
-                filters={filters}
-              />
-            )}
+            Movie Gallery
+          </h1>
+          <p
+            className="text-base sm:text-lg"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            Discover, search, and explore all our films
+          </p>
+        </header>
+
+        {/* Search Section */}
+        <section
+          className="rounded-2xl shadow-lg p-6 sm:p-8 transition-all duration-300 hover:shadow-xl"
+          style={{
+            backgroundColor: "var(--card-bg)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "var(--card-border)",
+          }}
+        >
+          <MovieSearch
+            onMovieSelect={handleMovieSelect}
+            existingMovies={movies}
+            enableScrolling={true}
+            onToggleSeen={handleToggleSeen}
+            currentUserId={currentUserId!}
+            currentUserLetterboxdUrl={currentUser?.letterboxdUrl}
+          />
+        </section>
+
+        {/* Filter Section */}
+        <section>
+          <FilterPanel
+            users={users}
+            filters={filters}
+            onFiltersChange={setFilters}
+            isOpen={isFilterOpen}
+            onToggle={() => setIsFilterOpen(!isFilterOpen)}
+          />
+        </section>
+
+        {/* Stats Dashboard */}
+        {!isLoading && movies.length > 0 && (
+          <section className="animate-fade-in-up">
+            <StatsDashboard movies={movies} filters={filters} />
+          </section>
+        )}
+
+        {/* Movies List Section */}
+        <section
+          className="rounded-2xl shadow-lg p-6 sm:p-8 transition-all duration-300"
+          style={{
+            backgroundColor: "var(--card-bg)",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            borderColor: "var(--card-border)",
+          }}
+        >
+          <div className="mb-6">
+            <h2
+              className="text-2xl font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              All Movies
+            </h2>
+            <p
+              className="text-sm mt-1"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {movies.length} {movies.length === 1 ? "film" : "films"} in our
+              collection
+            </p>
           </div>
-        </div>
-      </main>
-    </div>
+
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div
+                className="inline-block animate-spin rounded-full h-12 w-12 border-b-4"
+                style={{ borderColor: "var(--primary)" }}
+              ></div>
+              <p
+                className="mt-4 text-lg"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Loading your collection...
+              </p>
+            </div>
+          ) : (
+            <SuggestedMoviesList
+              movies={movies}
+              currentUserId={currentUserId!}
+              onAddViewer={handleAddViewer}
+              onDelete={handleDeleteMovie}
+              onToggleSeen={handleToggleSeen}
+              filters={filters}
+            />
+          )}
+        </section>
+      </div>
+    </main>
   );
 }
 
