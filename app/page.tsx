@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Loading from "./components/Loading";
 import MovieSearch from "./components/MovieSearch";
 import AddMovieModal from "./components/AddMovieModal";
 import SuggestedMoviesList from "./components/SuggestedMoviesList";
@@ -11,6 +12,7 @@ import Sidebar from "./components/Sidebar";
 import { TMDBMovie, User, Movie, MovieSuggestionData } from "@/types";
 
 export default function Home() {
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -36,6 +38,8 @@ export default function Home() {
       setUsers(data);
     } catch (error: unknown) {
       console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
     }
   };
 
@@ -132,6 +136,10 @@ export default function Home() {
   const handleUserSelect = (userId: number) => {
     setCurrentUserId(userId);
   };
+
+  if (loadingUsers) {
+    return <Loading />;
+  }
 
   if (!currentUserId) {
     return (

@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`https://letterboxd.com/${username}/films/`);
+    const response = await fetch(`https://letterboxd.com/${username}/diary/`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
     
     if (!response.ok) {
         if (response.status === 404) {
@@ -26,54 +30,57 @@ export async function GET(request: NextRequest) {
     }
 
     const html = await response.text();
-    const $ = cheerio.load(html);
-    const movies: { title: string; year?: number; posterUrl?: string; letterboxdSlug: string }[] = [];
-
     const cleanTitle = (title: string) => {
       return title.replace(/\s+\(\d{4}\)$/, '').trim();
     };
 
-    $('.poster-container').each((_, element) => {
-      const $element = $(element);
-      const $img = $element.find('img');
-      const $div = $element.find('div.film-poster');
+    const $ = cheerio.load(html);
+    const movies: { title: string; year?: number; posterUrl?: string; letterboxdSlug: string; watchedDate?: string; rating?: string }[] = [];
+
+    let currentMonth = "";
+    let currentYear = "";
+
+    $('.diary-entry-row').each((_, element) => {
+      const $row = $(element);
       
-      const rawTitle = $img.attr('alt') || "";
+      // Extract date info (handle sticky headers)
+      const $monthDate = $row.find('.col-monthdate');
+      if ($monthDate.text().trim()) {
+        currentMonth = $monthDate.find('.month').text().trim();
+        currentYear = $monthDate.find('.year').text().trim();
+      }
+      const day = $row.find('.col-daydate .daydate').text().trim();
+      
+      // Construct full date if possible
+      let watchedDate: string | undefined;
+      if (currentYear && currentMonth && day) {
+        watchedDate = `${day} ${currentMonth} ${currentYear}`;
+      }
+
+      // Extract film info from the LazyPoster component data attributes
+      const $posterDiv = $row.find('.react-component[data-component-class="LazyPoster"]');
+      const rawTitle = $posterDiv.attr('data-item-name') || "";
       const title = cleanTitle(rawTitle);
-      const posterUrl = $img.attr('src');
-      const slug = $div.attr('data-film-slug');
+      const slug = $posterDiv.attr('data-item-slug');
+      // Try to get a poster URL if available, though often it's a placeholder in the diary view
+      // The data-poster-url attribute usually points to a page, not an image. 
+      // We might need to rely on TMDB for posters as established.
       
+      // Extract rating
+      const ratingClass = $row.find('.rating').attr('class') || "";
+      const ratingMatch = ratingClass.match(/rated-(\d+)/);
+      const rating = ratingMatch ? (parseInt(ratingMatch[1]) / 2).toString() : undefined;
+
       if (title && slug) {
         movies.push({
           title,
-          posterUrl,
-          letterboxdSlug: slug
+          posterUrl: undefined, // Let frontend fetch from TMDB
+          letterboxdSlug: slug,
+          watchedDate,
+          rating
         });
       }
     });
-
-    // Fallback for React-based LazyPoster components
-    if (movies.length === 0) {
-      $('div.react-component[data-component-class="LazyPoster"]').each((_, element) => {
-        const $element = $(element);
-        const rawTitle = $element.attr('data-item-name') || "";
-        const title = cleanTitle(rawTitle);
-        const slug = $element.attr('data-item-slug');
-        // The poster URL in data-poster-url is often a page, not an image.
-        // We'll try to find an image inside, or use a placeholder.
-        // The img src is usually a placeholder (empty-poster).
-        // We'll leave posterUrl undefined and let the UI handle it, 
-        // or we could try to construct it if we knew the pattern.
-        
-        if (title && slug) {
-          movies.push({
-            title,
-            posterUrl: undefined, // No reliable poster URL in static HTML for lazy components
-            letterboxdSlug: slug
-          });
-        }
-      });
-    }
 
     return NextResponse.json({ movies });
   } catch (error: unknown) {

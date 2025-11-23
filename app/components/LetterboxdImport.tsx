@@ -11,6 +11,8 @@ interface LetterboxdMovie {
   posterUrl?: string;
   letterboxdSlug: string;
   tmdbPosterPath?: string | null;
+  watchedDate?: string;
+  rating?: string;
 }
 
 interface LetterboxdImportProps {
@@ -26,6 +28,8 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
   const { showToast } = useToast();
   const [resolvingMovie, setResolvingMovie] = useState<string | null>(null);
   const [tmdbPosters, setTmdbPosters] = useState<Record<string, string | null>>({});
+  const [filterYear, setFilterYear] = useState(true); // Default to filtering by current year
+  const currentYear = new Date().getFullYear().toString();
 
   // Queue to fetch TMDB posters for movies that don't have one
   useEffect(() => {
@@ -178,11 +182,26 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
 
       {movies.length > 0 && (
         <div className="animate-fade-in-up">
-          <h3 className="text-lg font-semibold mb-6" style={{ color: "var(--text-primary)" }}>
-            Found {movies.length} films from {username}
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              Found {movies.length} films from {username}
+            </h3>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filterYear}
+                onChange={(e) => setFilterYear(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                Seen in {currentYear}
+              </span>
+            </label>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {movies.map((movie) => {
+            {movies
+              .filter(m => !filterYear || (m.watchedDate && m.watchedDate.includes(currentYear)))
+              .map((movie) => {
               const alreadyAdded = isAlreadyAdded(movie.title);
               const tmdbPoster = tmdbPosters[movie.letterboxdSlug];
               const displayPoster = movie.posterUrl || (tmdbPoster ? `https://image.tmdb.org/t/p/w500${tmdbPoster}` : null);
@@ -210,6 +229,22 @@ export default function LetterboxdImport({ onMovieSelect, existingMovies = [] }:
                       <span className="text-sm text-gray-400 p-2 text-center">{movie.title}</span>
                     </div>
                   )}
+                  
+                  {/* Overlay Info */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent opacity-100 transition-opacity duration-300">
+                    <div className="flex flex-col gap-1">
+                      {movie.watchedDate && (
+                        <span className="text-xs text-gray-300 font-medium">
+                          👁️ {movie.watchedDate.split(' ').slice(0, 2).join(' ')}
+                        </span>
+                      )}
+                      {movie.rating && (
+                        <span className="text-xs text-yellow-400 font-medium">
+                          ★ {movie.rating}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   
                   {!alreadyAdded && (
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
