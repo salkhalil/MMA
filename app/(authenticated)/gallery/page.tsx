@@ -19,6 +19,8 @@ export default function GalleryPage() {
     minYear: null,
     maxYear: null,
     sortBy: "year-newest",
+    showWatchlistOnly: false,
+    showThisYearOnly: false,
   });
 
   useEffect(() => {

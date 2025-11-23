@@ -59,6 +59,22 @@ export default function SuggestedMoviesList({
       );
     }
 
+    // Filter by watchlist (movies current user hasn't seen)
+    if (filters.showWatchlistOnly) {
+      filteredMovies = filteredMovies.filter((movie) => {
+        const currentUserView = movie.movieViews?.find(
+          (mv) => mv.userId === currentUserId
+        );
+        // Show if user hasn't added themselves, or has marked as not seen
+        return !currentUserView || currentUserView.hasSeen === false;
+      });
+    }
+
+    // Filter by this year only (2025)
+    if (filters.showThisYearOnly) {
+      filteredMovies = filteredMovies.filter((movie) => movie.year === 2025);
+    }
+
     // Filter by selected viewers
     if (filters.selectedViewerIds.length > 0) {
       filteredMovies = filteredMovies.filter((movie) =>
