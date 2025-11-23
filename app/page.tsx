@@ -253,7 +253,7 @@ export default function Home() {
             >
               Search & Add Movies
             </h2>
-            <MovieSearch onMovieSelect={handleMovieSelect} />
+            <MovieSearch onMovieSelect={handleMovieSelect} existingMovies={movies} />
           </div>
 
           {/* Stats & Suggested Movies Section */}

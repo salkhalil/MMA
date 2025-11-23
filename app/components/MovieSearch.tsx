@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { TMDBMovie } from "@/types";
+import { TMDBMovie, Movie } from "@/types";
 import MovieCard from "./MovieCard";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useToast } from "@/app/context/ToastContext";
+import LetterboxdImport from "./LetterboxdImport";
 
 interface MovieSearchProps {
   onMovieSelect: (movie: TMDBMovie) => void;
+  existingMovies?: Movie[];
 }
 
 interface MovieSearchResponse {
@@ -15,7 +17,8 @@ interface MovieSearchResponse {
   error?: string;
 }
 
-export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
+export default function MovieSearch({ onMovieSelect, existingMovies = [] }: MovieSearchProps) {
+  const [activeTab, setActiveTab] = useState<"search" | "import">("search");
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 500);
   const [results, setResults] = useState<TMDBMovie[]>([]);
@@ -37,7 +40,7 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
 
       try {
         const response = await fetch(
-          `/api/movies/search?query=${encodeURIComponent(debouncedQuery)}`
+          '/api/movies/search?query=' + encodeURIComponent(debouncedQuery)
         );
         const data = (await response.json()) as MovieSearchResponse;
 
@@ -53,8 +56,10 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
       }
     };
 
-    searchMovies();
-  }, [debouncedQuery]);
+    if (activeTab === "search") {
+      searchMovies();
+    }
+  }, [debouncedQuery, activeTab]);
 
   const handleClear = () => {
     setQuery("");
@@ -71,53 +76,38 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="relative mb-8 group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <svg
-            className="h-5 w-5 transition-colors duration-200"
-            style={{ color: "var(--text-tertiary)" }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      <div className="flex justify-center mb-8">
+        <div className="bg-[var(--card-bg)] p-1 rounded-xl border border-[var(--card-border)] inline-flex">
+          <button
+            onClick={() => setActiveTab("search")}
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+              activeTab === "search"
+                ? "bg-[var(--primary)] text-white shadow-md"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+            Search
+          </button>
+          <button
+            onClick={() => setActiveTab("import")}
+            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+              activeTab === "import"
+                ? "bg-[var(--primary)] text-white shadow-md"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+          >
+            Import from Letterboxd
+          </button>
         </div>
+      </div>
 
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for a movie..."
-          className="w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-200 text-lg shadow-sm hover:shadow-md focus:shadow-lg"
-          style={{
-            backgroundColor: "var(--card-bg)",
-            borderColor: "var(--card-border)",
-            color: "var(--text-primary)",
-          }}
-        />
-
-        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-          {isSearching ? (
-            <div
-              className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent"
-              style={{ borderColor: "var(--primary)" }}
-            ></div>
-          ) : query ? (
-            <button
-              onClick={handleClear}
-              className="p-1 rounded-full transition-colors duration-200"
-              style={{ color: "var(--text-tertiary)" }}
-              aria-label="Clear search"
-            >
+      {activeTab === "search" ? (
+        <>
+          <div className="relative mb-8 group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5"
+                className="h-5 w-5 transition-colors duration-200"
+                style={{ color: "var(--text-tertiary)" }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -126,49 +116,95 @@ export default function MovieSearch({ onMovieSelect }: MovieSearchProps) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </button>
-          ) : null}
-        </div>
-      </div>
+            </div>
 
-      {!isSearching && hasSearched && results.length === 0 && (
-        <div className="text-center py-12 animate-fade-in-up">
-          <div className="text-6xl mb-4">🔍</div>
-          <h3
-            className="text-xl font-semibold mb-2"
-            style={{ color: "var(--text-primary)" }}
-          >
-            No results found
-          </h3>
-          <p style={{ color: "var(--text-secondary)" }}>
-            We couldn't find any movies matching "{query}"
-          </p>
-        </div>
-      )}
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for a movie..."
+              className="w-full pl-12 pr-12 py-4 border-2 rounded-2xl focus:outline-none focus:ring-4 transition-all duration-200 text-lg shadow-sm hover:shadow-md focus:shadow-lg"
+              style={{
+                backgroundColor: "var(--card-bg)",
+                borderColor: "var(--card-border)",
+                color: "var(--text-primary)",
+              }}
+            />
 
-      {results.length > 0 && (
-        <div className="animate-fade-in-up">
-          <div className="flex items-center justify-between mb-6">
-            <h3
-              className="text-lg font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Found {results.length} result{results.length !== 1 ? "s" : ""}
-            </h3>
+            <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+              {isSearching ? (
+                <div
+                  className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent"
+                  style={{ borderColor: "var(--primary)" }}
+                ></div>
+              ) : query ? (
+                <button
+                  onClick={handleClear}
+                  className="p-1 rounded-full transition-colors duration-200"
+                  style={{ color: "var(--text-tertiary)" }}
+                  aria-label="Clear search"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              ) : null}
+            </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-            {results.map((movie) => (
-              <MovieCard
-                key={movie.id}
-                movie={movie}
-                onClick={() => handleSelect(movie)}
-              />
-            ))}
-          </div>
-        </div>
+
+          {!isSearching && hasSearched && results.length === 0 && (
+            <div className="text-center py-12 animate-fade-in-up">
+              <div className="text-6xl mb-4">🔍</div>
+              <h3
+                className="text-xl font-semibold mb-2"
+                style={{ color: "var(--text-primary)" }}
+              >
+                No results found
+              </h3>
+              <p style={{ color: "var(--text-secondary)" }}>
+                We couldn't find any movies matching "{query}"
+              </p>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <div className="animate-fade-in-up">
+              <div className="flex items-center justify-between mb-6">
+                <h3
+                  className="text-lg font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Found {results.length} result{results.length !== 1 ? "s" : ""}
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {results.map((movie) => (
+                  <MovieCard
+                    key={movie.id}
+                    movie={movie}
+                    onClick={() => handleSelect(movie)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <LetterboxdImport onMovieSelect={handleSelect} existingMovies={existingMovies} />
       )}
     </div>
   );
