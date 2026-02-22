@@ -15,14 +15,15 @@ model User {
 }
 
 model Movie {
-  id         Int         @id @default(autoincrement())
-  tmdbId     Int         @unique
+  id         Int           @id @default(autoincrement())
+  tmdbId     Int           @unique
   title      String
   year       Int?
   posterPath String?
   overview   String?
-  createdAt  DateTime    @default(now())
+  createdAt  DateTime      @default(now())
   movieViews MovieView[]
+  credits    MovieCredit[]
 }
 
 model MovieView {
@@ -35,4 +36,44 @@ model MovieView {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([movieId, userId])
+}
+
+enum CategoryType {
+  FILM
+  ACTOR
+  DIRECTOR
+}
+
+model Category {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  type      CategoryType
+  createdAt DateTime     @default(now())
+}
+
+enum CreditRole {
+  ACTOR
+  DIRECTOR
+}
+
+model Person {
+  id           Int           @id @default(autoincrement())
+  tmdbId       Int           @unique
+  name         String
+  photoPath    String?
+  createdAt    DateTime      @default(now())
+  movieCredits MovieCredit[]
+}
+
+model MovieCredit {
+  id        Int        @id @default(autoincrement())
+  movieId   Int
+  personId  Int
+  role      CreditRole
+  character String?
+  order     Int?
+  movie     Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  person    Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, personId, role])
 }

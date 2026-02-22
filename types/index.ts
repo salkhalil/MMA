@@ -37,6 +37,28 @@ export interface TMDBMovie {
   vote_average: number;
 }
 
+export interface Person {
+  id: number;
+  tmdbId: number;
+  name: string;
+  photoPath: string | null;
+}
+
+export interface MovieCredit {
+  id: number;
+  personId: number;
+  role: "ACTOR" | "DIRECTOR";
+  character: string | null;
+  order: number | null;
+  person?: Person;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  type: "FILM" | "ACTOR" | "DIRECTOR";
+}
+
 export interface MovieSuggestionData {
   tmdbId: number;
   title: string;

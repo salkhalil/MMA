@@ -37,6 +37,41 @@ export async function searchMovies(query: string): Promise<TMDBSearchResponse> {
   return response.json();
 }
 
+export interface TMDBCredits {
+  id: number;
+  cast: Array<{
+    id: number;
+    name: string;
+    character: string;
+    order: number;
+    profile_path: string | null;
+  }>;
+  crew: Array<{
+    id: number;
+    name: string;
+    job: string;
+    department: string;
+    profile_path: string | null;
+  }>;
+}
+
+export async function getMovieCredits(tmdbId: number): Promise<TMDBCredits> {
+  if (!TMDB_API_KEY) {
+    throw new Error('TMDB_API_KEY is not configured');
+  }
+
+  const url = new URL(`${TMDB_BASE_URL}/movie/${tmdbId}/credits`);
+  url.searchParams.append('api_key', TMDB_API_KEY);
+
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error(`TMDB API error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 export function getPosterUrl(posterPath: string | null, size: 'w200' | 'w500' | 'original' = 'w500'): string | null {
   if (!posterPath) return null;
   return `https://image.tmdb.org/t/p/${size}${posterPath}`;
