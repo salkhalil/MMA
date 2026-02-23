@@ -70,9 +70,11 @@ export default function SuggestedMoviesList({
       });
     }
 
-    // Filter by this year only (2025)
-    if (filters.showThisYearOnly) {
-      filteredMovies = filteredMovies.filter((movie) => movie.year === 2025);
+    // Filter by pool
+    if (filters.poolFilter === "new_release") {
+      filteredMovies = filteredMovies.filter((movie) => movie.pool === "NEW_RELEASE");
+    } else if (filters.poolFilter === "classic") {
+      filteredMovies = filteredMovies.filter((movie) => movie.pool === "CLASSIC");
     }
 
     // Filter by selected viewers

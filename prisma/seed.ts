@@ -35,8 +35,8 @@ async function main() {
   for (const category of categories) {
     await prisma.category.upsert({
       where: { name: category.name },
-      update: { type: category.type },
-      create: { name: category.name, type: category.type },
+      update: { type: category.type, pool: category.pool },
+      create: { name: category.name, type: category.type, pool: category.pool },
     });
     console.log(`✓ Category: ${category.name}`);
   }

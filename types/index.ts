@@ -1,4 +1,5 @@
 export type Role = "USER" | "ADMIN";
+export type MoviePool = "NEW_RELEASE" | "CLASSIC";
 
 export interface User {
   id: number;
@@ -15,6 +16,7 @@ export interface Movie {
   year: number | null;
   posterPath: string | null;
   overview: string | null;
+  pool: MoviePool;
   createdAt: string;
   movieViews: MovieView[];
   viewerCount?: number;
@@ -60,6 +62,7 @@ export interface Category {
   id: number;
   name: string;
   type: "FILM" | "ACTOR" | "DIRECTOR";
+  pool: MoviePool;
 }
 
 export interface MovieSuggestionData {

@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
           year,
           posterPath,
           overview,
+          pool: year && year >= 2025 ? "NEW_RELEASE" : "CLASSIC",
           movieViews: {
             create: viewerIds.map((userId: number) => ({
               userId,

@@ -28,6 +28,7 @@ model Movie {
   year       Int?
   posterPath String?
   overview   String?
+  pool       MoviePool     @default(CLASSIC)
   createdAt  DateTime      @default(now())
   movieViews MovieView[]
   credits    MovieCredit[]
@@ -45,6 +46,11 @@ model MovieView {
   @@unique([movieId, userId])
 }
 
+enum MoviePool {
+  NEW_RELEASE
+  CLASSIC
+}
+
 enum CategoryType {
   FILM
   ACTOR
@@ -55,6 +61,7 @@ model Category {
   id        Int          @id @default(autoincrement())
   name      String       @unique
   type      CategoryType
+  pool      MoviePool    @default(NEW_RELEASE)
   createdAt DateTime     @default(now())
 }
 

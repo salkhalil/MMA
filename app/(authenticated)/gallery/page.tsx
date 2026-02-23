@@ -20,7 +20,7 @@ export default function GalleryPage() {
     maxYear: null,
     sortBy: "year-newest",
     showWatchlistOnly: false,
-    showThisYearOnly: false,
+    poolFilter: "all",
   });
 
   useEffect(() => {

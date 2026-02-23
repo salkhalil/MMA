@@ -1,7 +1,6 @@
 'use client';
 
 import { User } from '@/types';
-import { useState } from 'react';
 
 export interface FilterOptions {
   searchText: string;
@@ -10,7 +9,7 @@ export interface FilterOptions {
   maxYear: number | null;
   sortBy: 'year-newest' | 'year-oldest' | 'most-watched' | 'least-watched';
   showWatchlistOnly: boolean;
-  showThisYearOnly: boolean;
+  poolFilter: 'all' | 'new_release' | 'classic';
 }
 
 interface FilterPanelProps {
@@ -35,7 +34,7 @@ export default function FilterPanel({
     filters.maxYear !== null,
     filters.sortBy !== 'year-newest',
     filters.showWatchlistOnly,
-    filters.showThisYearOnly,
+    filters.poolFilter !== 'all',
   ].filter(Boolean).length;
 
   const handleClearFilters = () => {
@@ -46,7 +45,7 @@ export default function FilterPanel({
       maxYear: null,
       sortBy: 'year-newest',
       showWatchlistOnly: false,
-      showThisYearOnly: false,
+      poolFilter: 'all',
     });
   };
 
@@ -77,21 +76,29 @@ export default function FilterPanel({
           Watchlist Only
           {filters.showWatchlistOnly && <span className="text-xs">✓</span>}
         </button>
-        <button
-          onClick={() => onFiltersChange({ ...filters, showThisYearOnly: !filters.showThisYearOnly })}
-          className="px-5 py-2.5 rounded-lg font-semibold transition-all duration-200 flex items-center gap-2"
-          style={
-            filters.showThisYearOnly
-              ? { background: "var(--gradient-primary)", color: "white", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }
-              : { backgroundColor: "var(--background-secondary)", color: "var(--text-primary)", border: "1px solid var(--card-border)" }
-          }
+        <div
+          className="inline-flex rounded-lg overflow-hidden border"
+          style={{ borderColor: "var(--card-border)" }}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          2025 Only
-          {filters.showThisYearOnly && <span className="text-xs">✓</span>}
-        </button>
+          {([
+            { value: 'all' as const, label: 'All' },
+            { value: 'new_release' as const, label: 'New Releases' },
+            { value: 'classic' as const, label: 'Classics' },
+          ]).map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onFiltersChange({ ...filters, poolFilter: option.value })}
+              className="px-4 py-2.5 font-semibold transition-all duration-200 text-sm"
+              style={
+                filters.poolFilter === option.value
+                  ? { background: "var(--gradient-primary)", color: "white" }
+                  : { backgroundColor: "var(--background-secondary)", color: "var(--text-primary)" }
+              }
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Toggle Button */}
