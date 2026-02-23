@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ingestCreditsForMovie } from "@/lib/credits";
 
@@ -78,18 +78,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Ingest credits if the movie doesn't have any yet
+    // Ingest credits in the background after responding
     if (movie) {
-      const creditCount = await prisma.movieCredit.count({
-        where: { movieId: movie.id },
-      });
-      if (creditCount === 0) {
-        try {
-          await ingestCreditsForMovie(movie.id, tmdbId);
-        } catch (e) {
-          console.error("Failed to ingest credits for movie:", tmdbId, e);
+      const movieId = movie.id;
+      after(async () => {
+        const creditCount = await prisma.movieCredit.count({
+          where: { movieId },
+        });
+        if (creditCount === 0) {
+          try {
+            await ingestCreditsForMovie(movieId, tmdbId);
+          } catch (e) {
+            console.error("Failed to ingest credits for movie:", tmdbId, e);
+          }
         }
-      }
+      });
     }
 
     return NextResponse.json(movie);
