@@ -6,9 +6,16 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id            Int         @id @default(autoincrement())
   name          String      @unique
+  password      String      @default("")
+  role          Role        @default(USER)
   letterboxdUrl String?
   createdAt     DateTime    @default(now())
   movieViews    MovieView[]

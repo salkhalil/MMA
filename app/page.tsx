@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useUser } from "@/app/context/UserContext";
 import Loading from "./components/Loading";
+import PasswordModal from "./components/PasswordModal";
 
 export default function Home() {
-  const { currentUserId, users, setCurrentUserId, loadingUsers } = useUser();
+  const { currentUserId, users, verifyAndSetUser, loadingUsers } = useUser();
   const router = useRouter();
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
 
   // Redirect to /add if user is already selected
   useEffect(() => {
@@ -17,9 +19,10 @@ export default function Home() {
     }
   }, [currentUserId, loadingUsers, router]);
 
+  const pendingUser = users.find((u) => u.id === pendingUserId) || null;
+
   const handleUserSelect = (userId: number) => {
-    setCurrentUserId(userId);
-    router.push("/add");
+    setPendingUserId(userId);
   };
 
   if (loadingUsers) {
@@ -80,6 +83,18 @@ export default function Home() {
           </button>
         ))}
       </div>
+
+      {pendingUser && (
+        <PasswordModal
+          userName={pendingUser.name}
+          onSubmit={async (password) => {
+            const ok = await verifyAndSetUser(pendingUser.id, password);
+            if (ok) router.push("/add");
+            return ok;
+          }}
+          onClose={() => setPendingUserId(null)}
+        />
+      )}
     </div>
   );
 }

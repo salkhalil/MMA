@@ -11,6 +11,8 @@ interface UserContextType {
   setUsers: (users: User[]) => void;
   loadingUsers: boolean;
   setLoadingUsers: (loading: boolean) => void;
+  isAdmin: boolean;
+  verifyAndSetUser: (userId: number, password: string) => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -64,6 +66,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   const currentUser = users.find((u) => u.id === currentUserId) || null;
+  const isAdmin = currentUser?.role === "ADMIN";
+
+  const verifyAndSetUser = async (userId: number, password: string): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/verify-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, password }),
+      });
+      if (!res.ok) return false;
+      setCurrentUserId(userId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <UserContext.Provider
@@ -75,6 +93,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUsers,
         loadingUsers,
         setLoadingUsers,
+        isAdmin,
+        verifyAndSetUser,
       }}
     >
       {children}

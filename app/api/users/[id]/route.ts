@@ -42,6 +42,7 @@ export async function PATCH(
       data: {
         letterboxdUrl: letterboxdUrl || null,
       },
+      select: { id: true, name: true, role: true, letterboxdUrl: true, createdAt: true },
     });
 
     return NextResponse.json(updatedUser);

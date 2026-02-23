@@ -5,10 +5,12 @@ import { useUser } from "@/app/context/UserContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import PasswordModal from "./PasswordModal";
 
 function Navigation() {
-  const { currentUser, users, setCurrentUserId } = useUser();
+  const { currentUser, users, setCurrentUserId, verifyAndSetUser } = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -25,9 +27,15 @@ function Navigation() {
   }, []);
 
   const handleUserChange = (userId: number) => {
-    setCurrentUserId(userId);
+    if (userId === currentUser?.id) {
+      setShowUserMenu(false);
+      return;
+    }
+    setPendingUserId(userId);
     setShowUserMenu(false);
   };
+
+  const pendingUser = users.find((u) => u.id === pendingUserId) || null;
 
   const handleLogout = () => {
     setCurrentUserId(null);
@@ -214,6 +222,16 @@ function Navigation() {
           </div>
         </div>
       </div>
+
+      {pendingUser && (
+        <PasswordModal
+          userName={pendingUser.name}
+          onSubmit={async (password) => {
+            return verifyAndSetUser(pendingUser.id, password);
+          }}
+          onClose={() => setPendingUserId(null)}
+        />
+      )}
     </nav>
   );
 }

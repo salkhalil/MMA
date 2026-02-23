@@ -1,6 +1,9 @@
+export type Role = "USER" | "ADMIN";
+
 export interface User {
   id: number;
   name: string;
+  role: Role;
   letterboxdUrl?: string;
   createdAt: string;
 }

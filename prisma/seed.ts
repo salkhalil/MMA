@@ -4,28 +4,27 @@ import { categories } from "./categories";
 import { ingestCreditsForMovie } from "../lib/credits";
 
 async function main() {
-  // Add your friends' names here
-  const friends = [
-    "Sal",
-    "Jacob",
-    "Tuush",
-    "Davi",
-    "Ani",
-    "Jonny",
-    "Elliot",
-    "Henry",
-    "Jake",
-    "Tom",
-    "Khaled",
+  const friends: { name: string; password: string; role?: "ADMIN" | "USER" }[] = [
+    { name: "Sal", password: "bigboss", role: "ADMIN" },
+    { name: "Jacob", password: "popcorn" },
+    { name: "Tuush", password: "stardust" },
+    { name: "Davi", password: "moonlight" },
+    { name: "Ani", password: "redsox" },
+    { name: "Jonny", password: "topdog" },
+    { name: "Elliot", password: "maverick" },
+    { name: "Henry", password: "goldfish" },
+    { name: "Jake", password: "thunder" },
+    { name: "Tom", password: "wildcard" },
+    { name: "Khaled", password: "legend" },
   ];
 
   console.log("Seeding database with friends...");
 
-  for (const name of friends) {
+  for (const { name, password, role } of friends) {
     await prisma.user.upsert({
       where: { name },
-      update: {},
-      create: { name },
+      update: { password, role: role ?? "USER" },
+      create: { name, password, role: role ?? "USER" },
     });
     console.log(`✓ Added ${name}`);
   }
