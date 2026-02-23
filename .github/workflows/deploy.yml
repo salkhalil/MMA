@@ -1,0 +1,42 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Migrate, Seed & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database migrations
+        env:
+          DB_DATABASE_URL: ${{ secrets.DB_DATABASE_URL }}
+        run: npx prisma migrate deploy
+
+      - name: Run database seed
+        env:
+          DB_DATABASE_URL: ${{ secrets.DB_DATABASE_URL }}
+          DB_PRISMA_DATABASE_URL: ${{ secrets.DB_PRISMA_DATABASE_URL }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: npx prisma db seed
+
+      - name: Deploy to Vercel (production)
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
