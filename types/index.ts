@@ -65,6 +65,19 @@ export interface Category {
   pool: MoviePool;
 }
 
+export interface Nomination {
+  id: number;
+  userId: number;
+  categoryId: number;
+  movieId: number | null;
+  movieCreditId: number | null;
+  rank: number;
+  createdAt: string;
+  updatedAt: string;
+  movie?: Movie;
+  movieCredit?: MovieCredit & { movie?: Movie };
+}
+
 export interface MovieSuggestionData {
   tmdbId: number;
   title: string;

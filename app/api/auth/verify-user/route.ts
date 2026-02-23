@@ -24,7 +24,15 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    response.cookies.set("verified_user", String(user.id), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 24h
+      path: "/",
+    });
+    return response;
   } catch (error: unknown) {
     console.error("Error verifying user:", error);
     return NextResponse.json(

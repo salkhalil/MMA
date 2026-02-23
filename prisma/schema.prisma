@@ -12,13 +12,14 @@ enum Role {
 }
 
 model User {
-  id            Int         @id @default(autoincrement())
-  name          String      @unique
-  password      String      @default("")
-  role          Role        @default(USER)
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  password      String        @default("")
+  role          Role          @default(USER)
   letterboxdUrl String?
-  createdAt     DateTime    @default(now())
+  createdAt     DateTime      @default(now())
   movieViews    MovieView[]
+  nominations   Nomination[]
 }
 
 model Movie {
@@ -30,8 +31,9 @@ model Movie {
   overview   String?
   pool       MoviePool     @default(CLASSIC)
   createdAt  DateTime      @default(now())
-  movieViews MovieView[]
-  credits    MovieCredit[]
+  movieViews   MovieView[]
+  credits      MovieCredit[]
+  nominations  Nomination[]
 }
 
 model MovieView {
@@ -58,11 +60,12 @@ enum CategoryType {
 }
 
 model Category {
-  id        Int          @id @default(autoincrement())
-  name      String       @unique
-  type      CategoryType
-  pool      MoviePool    @default(NEW_RELEASE)
-  createdAt DateTime     @default(now())
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  type        CategoryType
+  pool        MoviePool    @default(NEW_RELEASE)
+  createdAt   DateTime     @default(now())
+  nominations Nomination[]
 }
 
 enum CreditRole {
@@ -86,8 +89,27 @@ model MovieCredit {
   role      CreditRole
   character String?
   order     Int?
-  movie     Movie      @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  person    Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+  movie       Movie        @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  person      Person       @relation(fields: [personId], references: [id], onDelete: Cascade)
+  nominations Nomination[]
 
   @@unique([movieId, personId, role])
+}
+
+model Nomination {
+  id            Int          @id @default(autoincrement())
+  userId        Int
+  categoryId    Int
+  movieId       Int?
+  movieCreditId Int?
+  rank          Int
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id])
+  category      Category     @relation(fields: [categoryId], references: [id])
+  movie         Movie?       @relation(fields: [movieId], references: [id])
+  movieCredit   MovieCredit? @relation(fields: [movieCreditId], references: [id])
+
+  @@unique([userId, categoryId, rank])
 }
