@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Valid movies: matching pool (or any pool if category is ALL) + movies with pool ALL always eligible
     const validMovieWhere = {
-      ...(category.pool !== "ALL" && { pool: { in: [category.pool, "ALL"] } }),
+      ...(category.pool !== "ALL" && { pool: { in: [category.pool, "ALL" as const] } }),
       movieViews: { some: {} },
     };
 
