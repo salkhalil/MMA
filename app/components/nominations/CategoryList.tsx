@@ -78,7 +78,7 @@ export default function CategoryList({
               {POOL_LABELS[pool]}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {cats.map((cat) => {
+              {cats.map((cat, idx) => {
                 const done = completedIds.has(cat.id);
                 const typeStyle = TYPE_COLORS[cat.type];
                 return (
@@ -116,7 +116,7 @@ export default function CategoryList({
                           className="w-8 h-8 rounded-full flex items-center justify-center"
                           style={{ backgroundColor: "var(--background-secondary)", color: "var(--text-tertiary)" }}
                         >
-                          <span className="text-sm font-bold">{cat.id}</span>
+                          <span className="text-sm font-bold">{idx + 1}</span>
                         </div>
                       )}
                     </div>
