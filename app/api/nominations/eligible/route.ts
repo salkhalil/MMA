@@ -7,8 +7,8 @@ function getActorFilter(categoryName: string): ActorFilter | null {
   const map: Record<string, ActorFilter> = {
     "Best Actor": { gender: 2, orderFilter: { lte: 2 } },
     "Best Actress": { gender: 1, orderFilter: { lte: 2 } },
-    "Best Supporting Actor": { gender: 2, orderFilter: { gte: 3 } },
-    "Best Supporting Actress": { gender: 1, orderFilter: { gte: 3 } },
+    "Best Supporting Actor": { gender: 2, orderFilter: { gte: 2 } },
+    "Best Supporting Actress": { gender: 1, orderFilter: { gte: 2 } },
   };
   return map[categoryName] ?? null;
 }
