@@ -19,7 +19,9 @@ export default function PasswordModal({ userName, onSubmit, onClose }: PasswordM
     setLoading(true);
     try {
       const success = await onSubmit(password);
-      if (!success) {
+      if (success) {
+        onClose();
+      } else {
         setError("Wrong password");
         setPassword("");
       }
