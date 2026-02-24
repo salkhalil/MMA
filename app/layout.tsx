@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mandmem Movie Awards",
+  title: "Mandem Movie Awards",
   description: "Fook Oscar",
   metadataBase: new URL("https://mma.salkhalil.com"),
   icons: {
