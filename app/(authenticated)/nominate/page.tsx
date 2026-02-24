@@ -110,6 +110,7 @@ export default function NominatePage() {
         >
           {selectedCategory ? (
             <CategoryNominationForm
+              key={selectedCategory.id}
               category={selectedCategory}
               userId={currentUserId!}
               locked={locked}
