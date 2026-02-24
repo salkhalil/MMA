@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest) {
             { status: 400 }
           );
         }
-        if (movie.pool !== category.pool) {
+        if (category.pool !== "ALL" && movie.pool !== category.pool) {
           return NextResponse.json(
             { error: `Movie "${movie.title}" pool mismatch` },
             { status: 400 }
@@ -195,7 +195,7 @@ export async function PUT(request: NextRequest) {
             { status: 400 }
           );
         }
-        if (credit.movie.pool !== category.pool) {
+        if (category.pool !== "ALL" && credit.movie.pool !== category.pool) {
           return NextResponse.json(
             { error: `Movie "${credit.movie.title}" pool mismatch` },
             { status: 400 }
