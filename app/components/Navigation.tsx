@@ -103,6 +103,21 @@ function Navigation() {
               Add Movies
             </Link>
             <Link
+              href="/nominate"
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                pathname === "/nominate"
+                  ? "text-white shadow-md"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+              style={
+                pathname === "/nominate"
+                  ? { background: "var(--gradient-primary)" }
+                  : { color: "var(--text-primary)" }
+              }
+            >
+              Nominate
+            </Link>
+            <Link
               href="/gallery"
               className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                 pathname === "/gallery"

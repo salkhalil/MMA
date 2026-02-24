@@ -78,6 +78,19 @@ export interface Nomination {
   movieCredit?: MovieCredit & { movie?: Movie };
 }
 
+export interface NominationStatus {
+  completedCategoryIds: number[];
+}
+
+export interface RankedItem {
+  rank: number;
+  movieId?: number;
+  movieCreditId?: number;
+  // Client-side display data
+  movie?: Movie;
+  movieCredit?: MovieCredit & { movie?: Movie };
+}
+
 export interface MovieSuggestionData {
   tmdbId: number;
   title: string;

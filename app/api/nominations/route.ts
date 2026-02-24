@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth";
+import { isNominationsLocked } from "@/lib/config";
 
 const NOMINATION_INCLUDE = {
   movie: true,
@@ -51,6 +52,13 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    if (isNominationsLocked()) {
+      return NextResponse.json(
+        { error: "Nominations period has closed" },
+        { status: 403 }
+      );
+    }
+
     const verifiedUserId = await getVerifiedUserId();
     if (!verifiedUserId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
