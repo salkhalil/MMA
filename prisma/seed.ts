@@ -4,19 +4,20 @@ import { categories } from "./categories";
 import { ingestCreditsForMovie } from "../lib/credits";
 
 async function main() {
-  const friends: { name: string; password: string; role?: "ADMIN" | "USER" }[] = [
-    { name: "Sal", password: "bigboss", role: "ADMIN" },
-    { name: "Jacob", password: "popcorn" },
-    { name: "Tuush", password: "stardust" },
-    { name: "Davi", password: "moonlight" },
-    { name: "Ani", password: "redsox" },
-    { name: "Jonny", password: "topdog" },
-    { name: "Elliot", password: "maverick" },
-    { name: "Henry", password: "goldfish" },
-    { name: "Jake", password: "thunder" },
-    { name: "Tom", password: "wildcard" },
-    { name: "Khaled", password: "legend" },
-  ];
+  const friends: { name: string; password: string; role?: "ADMIN" | "USER" }[] =
+    [
+      { name: "Sal", password: "bigboss", role: "ADMIN" },
+      { name: "Jacob", password: "popcorn" },
+      { name: "Tuush", password: "stardust" },
+      { name: "Davi", password: "moonlight" },
+      { name: "Ani", password: "redsox" },
+      { name: "Jonny", password: "topdog" },
+      { name: "Elliot", password: "maverick" },
+      { name: "Henry", password: "goldfish" },
+      { name: "Jake", password: "thunder" },
+      { name: "Tom", password: "wildcard" },
+      { name: "Khaled", password: "legend", role: "ADMIN" },
+    ];
 
   console.log("Seeding database with friends...");
 
