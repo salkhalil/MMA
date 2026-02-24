@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth";
+import { Role } from "@prisma/client";
 
 export async function PATCH(
   request: NextRequest,
@@ -16,7 +17,7 @@ export async function PATCH(
       where: { id: verifiedUserId },
       select: { id: true, role: true },
     });
-    if (!admin || admin.role !== "ADMIN") {
+    if (!admin || admin.role !== Role.ADMIN) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -29,14 +30,14 @@ export async function PATCH(
     const body = await request.json();
     const { password, role } = body;
 
-    if (password !== undefined && (typeof password !== "string" || !password.trim())) {
-      return NextResponse.json({ error: "Password must be a non-empty string" }, { status: 400 });
-    }
-    if (role !== undefined && role !== "USER" && role !== "ADMIN") {
-      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
-    }
     if (password === undefined && role === undefined) {
       return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+    }
+    if (password != undefined && !password.trim()) {
+      return NextResponse.json({ error: "Password must be provided" }, { status: 400 });
+    }
+    if (role != undefined && !Object.values(Role).includes(role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
     const data: Record<string, string> = {};

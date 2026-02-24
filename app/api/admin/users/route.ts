@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth";
+import { z } from "zod";
+import { Role } from "@prisma/client";
+
+const createUserSchema = z.object({
+  name: z.string().min(1).trim(),
+  password: z.string().min(1),
+  role: z.enum(Object.values(Role)),
+});
 
 export async function GET() {
   try {
@@ -60,20 +68,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { name, password, role } = await request.json();
-
-    if (typeof name !== "string" || !name.trim()) {
-      return NextResponse.json({ error: "Name required" }, { status: 400 });
-    }
-    if (typeof password !== "string" || !password.trim()) {
-      return NextResponse.json({ error: "Password required" }, { status: 400 });
-    }
-    if (role !== "USER" && role !== "ADMIN") {
-      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
-    }
+    const parsed = createUserSchema.safeParse(await request.json());
+    if (!parsed.success)
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
     const user = await prisma.user.create({
-      data: { name: name.trim(), password: password.trim(), role },
+      data: parsed.data,
       select: { id: true, name: true, role: true },
     });
 

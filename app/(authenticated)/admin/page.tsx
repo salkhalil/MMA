@@ -3,6 +3,7 @@
 import { useUser } from "@/app/context/UserContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import { Role } from "@prisma/client";
 
 interface AdminUser {
   id: number;
@@ -15,7 +16,7 @@ interface AdminUser {
 
 type Tab = "users" | "progress";
 
-const ROLE_OPTIONS = ["USER", "ADMIN"] as const;
+const ROLE_OPTIONS = Object.values(Role);
 
 export default function AdminPage() {
   const { isAdmin, currentUser } = useUser();
@@ -32,7 +33,7 @@ export default function AdminPage() {
   // New user form
   const [newName, setNewName] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newRole, setNewRole] = useState<"USER" | "ADMIN">("USER");
+  const [newRole, setNewRole] = useState<Role>(Role.USER);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
@@ -180,10 +181,10 @@ export default function AdminPage() {
             style={
               tab === t.key
                 ? {
-                    backgroundColor: "var(--card-bg)",
-                    color: "var(--text-primary)",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                  }
+                  backgroundColor: "var(--card-bg)",
+                  color: "var(--text-primary)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                }
                 : { color: "var(--text-secondary)" }
             }
           >
@@ -291,7 +292,7 @@ export default function AdminPage() {
               />
               <select
                 value={newRole}
-                onChange={(e) => setNewRole(e.target.value as "USER" | "ADMIN")}
+                onChange={(e) => setNewRole(e.target.value as Role)}
                 className="px-3 py-1.5 rounded-lg border text-sm"
                 style={{
                   backgroundColor: "var(--background)",
