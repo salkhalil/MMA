@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Valid movies: matching pool + 2+ viewers
+    // Valid movies: matching pool (or any pool if ALL) + 2+ viewers
     const validMovieWhere = {
-      pool: category.pool,
+      ...(category.pool !== "ALL" && { pool: category.pool }),
       movieViews: { some: {} },
     };
 

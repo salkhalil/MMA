@@ -1,5 +1,5 @@
 export type Role = "USER" | "ADMIN";
-export type MoviePool = "NEW_RELEASE" | "CLASSIC";
+export type MoviePool = "NEW_RELEASE" | "CLASSIC" | "ALL";
 
 export interface User {
   id: number;

@@ -18,6 +18,7 @@ const TYPE_COLORS: Record<string, { bg: string; color: string }> = {
 const POOL_LABELS: Record<MoviePool, string> = {
   NEW_RELEASE: "New Releases",
   CLASSIC: "Classics",
+  ALL: "Wildcard",
 };
 
 export default function CategoryList({
@@ -39,7 +40,7 @@ export default function CategoryList({
     {} as Record<MoviePool, Category[]>
   );
 
-  const pools: MoviePool[] = ["NEW_RELEASE", "CLASSIC"];
+  const pools: MoviePool[] = ["NEW_RELEASE", "CLASSIC", "ALL"];
 
   return (
     <div className="space-y-8">

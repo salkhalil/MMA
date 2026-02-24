@@ -19,4 +19,10 @@ export const categories = [
 
   // Classic categories
   { name: "Best Film Seen at Home", type: CategoryType.FILM, pool: MoviePool.CLASSIC },
+
+  // All-pool categories
+  { name: "Best M.U.I (Movie Under the Influence)", type: CategoryType.FILM, pool: MoviePool.ALL },
+  { name: "Best Film Tush Hates", type: CategoryType.FILM, pool: MoviePool.ALL },
+  { name: "Worst Film Sal Loves", type: CategoryType.FILM, pool: MoviePool.ALL },
+  { name: "Worst Film", type: CategoryType.FILM, pool: MoviePool.ALL },
 ] as const;

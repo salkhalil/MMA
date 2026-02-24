@@ -51,6 +51,7 @@ model MovieView {
 enum MoviePool {
   NEW_RELEASE
   CLASSIC
+  ALL
 }
 
 enum CategoryType {
