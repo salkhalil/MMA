@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { User } from "@/types";
 
 interface UserContextType {
@@ -12,6 +12,7 @@ interface UserContextType {
   loadingUsers: boolean;
   setLoadingUsers: (loading: boolean) => void;
   isAdmin: boolean;
+  sessionExpired: boolean;
   verifyAndSetUser: (userId: number, password: string) => Promise<boolean>;
 }
 
@@ -65,8 +66,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const [sessionExpired, setSessionExpired] = useState(false);
+
   const currentUser = users.find((u) => u.id === currentUserId) || null;
   const isAdmin = currentUser?.role === "ADMIN";
+
+  // Check session validity on window focus
+  const checkSession = useCallback(async () => {
+    if (!currentUserId) return;
+    try {
+      const res = await fetch("/api/auth/check");
+      if (res.status === 401) setSessionExpired(true);
+    } catch { /* ignore network errors */ }
+  }, [currentUserId]);
+
+  useEffect(() => {
+    window.addEventListener("focus", checkSession);
+    return () => window.removeEventListener("focus", checkSession);
+  }, [checkSession]);
 
   const verifyAndSetUser = async (userId: number, password: string): Promise<boolean> => {
     try {
@@ -77,6 +94,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) return false;
       setCurrentUserId(userId);
+      setSessionExpired(false);
       return true;
     } catch {
       return false;
@@ -94,6 +112,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         loadingUsers,
         setLoadingUsers,
         isAdmin,
+        sessionExpired,
         verifyAndSetUser,
       }}
     >
