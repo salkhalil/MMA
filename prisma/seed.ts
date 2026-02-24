@@ -23,7 +23,7 @@ async function main() {
   for (const { name, password, role } of friends) {
     await prisma.user.upsert({
       where: { name },
-      update: { password, role: role ?? "USER" },
+      update: { role: role ?? "USER" },
       create: { name, password, role: role ?? "USER" },
     });
     console.log(`✓ Added ${name}`);

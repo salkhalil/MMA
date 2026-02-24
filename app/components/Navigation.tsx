@@ -8,7 +8,7 @@ import Link from "next/link";
 import PasswordModal from "./PasswordModal";
 
 function Navigation() {
-  const { currentUser, users, setCurrentUserId, verifyAndSetUser } = useUser();
+  const { currentUser, users, setCurrentUserId, verifyAndSetUser, isAdmin } = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<number | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -132,6 +132,23 @@ function Navigation() {
             >
               Gallery
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  pathname === "/admin"
+                    ? "text-white shadow-md"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+                style={
+                  pathname === "/admin"
+                    ? { background: "var(--gradient-primary)" }
+                    : { color: "var(--text-primary)" }
+                }
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* User Menu */}
