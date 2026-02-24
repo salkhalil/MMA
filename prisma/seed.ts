@@ -49,6 +49,10 @@ async function main() {
   });
 
   for (const movie of movies) {
+    if (movie.credits.length > 0) {
+      console.log(`⏭ ${movie.title} — already has credits`);
+      continue;
+    }
     try {
       await ingestCreditsForMovie(movie.id, movie.tmdbId);
       console.log(`✓ Credits ingested for ${movie.title}`);
