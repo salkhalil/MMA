@@ -26,14 +26,26 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
     }
 
-    const { password } = await request.json();
-    if (typeof password !== "string" || !password.trim()) {
-      return NextResponse.json({ error: "Password required" }, { status: 400 });
+    const body = await request.json();
+    const { password, role } = body;
+
+    if (password !== undefined && (typeof password !== "string" || !password.trim())) {
+      return NextResponse.json({ error: "Password must be a non-empty string" }, { status: 400 });
     }
+    if (role !== undefined && role !== "USER" && role !== "ADMIN") {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    }
+    if (password === undefined && role === undefined) {
+      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+    }
+
+    const data: Record<string, string> = {};
+    if (password !== undefined) data.password = password.trim();
+    if (role !== undefined) data.role = role;
 
     const updated = await prisma.user.update({
       where: { id: userId },
-      data: { password: password.trim() },
+      data,
     });
 
     return NextResponse.json({ id: updated.id, name: updated.name });

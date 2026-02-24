@@ -15,6 +15,8 @@ interface AdminUser {
 
 type Tab = "users" | "progress";
 
+const ROLE_OPTIONS = ["USER", "ADMIN"] as const;
+
 export default function AdminPage() {
   const { isAdmin, currentUser } = useUser();
   const router = useRouter();
@@ -22,9 +24,17 @@ export default function AdminPage() {
   const [totalCategories, setTotalCategories] = useState(0);
   const [loading, setLoading] = useState(true);
   const [passwords, setPasswords] = useState<Record<number, string>>({});
+  const [roles, setRoles] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState<Record<number, boolean>>({});
   const [saved, setSaved] = useState<Record<number, boolean>>({});
   const [tab, setTab] = useState<Tab>("progress");
+
+  // New user form
+  const [newName, setNewName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState<"USER" | "ADMIN">("USER");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   useEffect(() => {
     if (currentUser && !isAdmin) {
@@ -44,8 +54,13 @@ export default function AdminPage() {
       setUsers(usersData);
       setTotalCategories(catsData.length);
       const pw: Record<number, string> = {};
-      usersData.forEach((u: AdminUser) => { pw[u.id] = u.password; });
+      const rl: Record<number, string> = {};
+      usersData.forEach((u: AdminUser) => {
+        pw[u.id] = u.password;
+        rl[u.id] = u.role;
+      });
       setPasswords(pw);
+      setRoles(rl);
     } finally {
       setLoading(false);
     }
@@ -53,21 +68,60 @@ export default function AdminPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleSavePassword = async (userId: number) => {
+  const handleSaveUser = async (userId: number) => {
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
+
+    const passwordChanged = passwords[userId] !== user.password;
+    const roleChanged = roles[userId] !== user.role;
+    if (!passwordChanged && !roleChanged) return;
+
     setSaving((p) => ({ ...p, [userId]: true }));
     setSaved((p) => ({ ...p, [userId]: false }));
     try {
+      const body: Record<string, string> = {};
+      if (passwordChanged) body.password = passwords[userId];
+      if (roleChanged) body.role = roles[userId];
+
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: passwords[userId] }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         setSaved((p) => ({ ...p, [userId]: true }));
         setTimeout(() => setSaved((p) => ({ ...p, [userId]: false })), 2000);
+        await fetchData();
       }
     } finally {
       setSaving((p) => ({ ...p, [userId]: false }));
+    }
+  };
+
+  const handleCreateUser = async () => {
+    setCreateError("");
+    if (!newName.trim() || !newPassword.trim()) {
+      setCreateError("Name and password are required.");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName.trim(), password: newPassword.trim(), role: newRole }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCreateError(data.error ?? "Failed to create user.");
+        return;
+      }
+      setNewName("");
+      setNewPassword("");
+      setNewRole("USER");
+      await fetchData();
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -88,7 +142,7 @@ export default function AdminPage() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "progress", label: "Progress" },
-    { key: "users", label: "Passwords" },
+    { key: "users", label: "Users" },
   ];
 
   return (
@@ -199,66 +253,135 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* Passwords tab */}
+      {/* Users tab */}
       {tab === "users" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {users.map((user) => {
-            const original = users.find((u) => u.id === user.id)?.password;
-            const changed = passwords[user.id] !== original;
-
-            return (
-              <div
-                key={user.id}
-                className="rounded-xl border p-5"
+        <div className="space-y-6">
+          {/* Add user form */}
+          <div
+            className="rounded-xl border p-5"
+            style={{ backgroundColor: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
+              Add User
+            </h2>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                placeholder="Name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
                 style={{
-                  backgroundColor: "var(--card-bg)",
+                  backgroundColor: "var(--background)",
                   borderColor: "var(--card-border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="flex-1 px-3 py-1.5 rounded-lg border text-sm font-mono"
+                style={{
+                  backgroundColor: "var(--background)",
+                  borderColor: "var(--card-border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as "USER" | "ADMIN")}
+                className="px-3 py-1.5 rounded-lg border text-sm"
+                style={{
+                  backgroundColor: "var(--background)",
+                  borderColor: "var(--card-border)",
+                  color: "var(--text-primary)",
                 }}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                    style={{ background: "var(--gradient-primary)" }}
-                  >
-                    {user.name.charAt(0)}
+                {ROLE_OPTIONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <button
+                onClick={handleCreateUser}
+                disabled={creating}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40 shrink-0"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {creating ? "..." : "Add"}
+              </button>
+            </div>
+            {createError && (
+              <p className="text-xs mt-2" style={{ color: "rgb(239,68,68)" }}>{createError}</p>
+            )}
+          </div>
+
+          {/* User cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {users.map((user) => {
+              const pwChanged = passwords[user.id] !== user.password;
+              const roleChanged = roles[user.id] !== user.role;
+              const changed = pwChanged || roleChanged;
+
+              return (
+                <div
+                  key={user.id}
+                  className="rounded-xl border p-5"
+                  style={{
+                    backgroundColor: "var(--card-bg)",
+                    borderColor: "var(--card-border)",
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
+                      style={{ background: "var(--gradient-primary)" }}
+                    >
+                      {user.name.charAt(0)}
+                    </div>
+                    <h2 className="font-semibold flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>
+                      {user.name}
+                    </h2>
+                    <select
+                      value={roles[user.id] ?? user.role}
+                      onChange={(e) => setRoles((p) => ({ ...p, [user.id]: e.target.value }))}
+                      className="text-xs font-medium px-2 py-0.5 rounded-full border-0 shrink-0 cursor-pointer"
+                      style={{
+                        backgroundColor: (roles[user.id] ?? user.role) === "ADMIN" ? "rgba(139,92,246,0.15)" : "rgba(59,130,246,0.15)",
+                        color: (roles[user.id] ?? user.role) === "ADMIN" ? "rgb(139,92,246)" : "rgb(59,130,246)",
+                      }}
+                    >
+                      {ROLE_OPTIONS.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
                   </div>
-                  <h2 className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {user.name}
-                  </h2>
-                  <span
-                    className="text-xs font-medium px-2 py-0.5 rounded-full ml-auto"
-                    style={{
-                      backgroundColor: user.role === "ADMIN" ? "rgba(139,92,246,0.15)" : "rgba(59,130,246,0.15)",
-                      color: user.role === "ADMIN" ? "rgb(139,92,246)" : "rgb(59,130,246)",
-                    }}
-                  >
-                    {user.role}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={passwords[user.id] ?? ""}
+                      onChange={(e) => setPasswords((p) => ({ ...p, [user.id]: e.target.value }))}
+                      className="flex-1 px-3 py-1.5 rounded-lg border text-sm font-mono"
+                      style={{
+                        backgroundColor: "var(--background)",
+                        borderColor: "var(--card-border)",
+                        color: "var(--text-primary)",
+                      }}
+                    />
+                    <button
+                      onClick={() => handleSaveUser(user.id)}
+                      disabled={saving[user.id] || !changed}
+                      className="px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40"
+                      style={{ background: "var(--gradient-primary)" }}
+                    >
+                      {saving[user.id] ? "..." : saved[user.id] ? "Saved" : "Save"}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={passwords[user.id] ?? ""}
-                    onChange={(e) => setPasswords((p) => ({ ...p, [user.id]: e.target.value }))}
-                    className="flex-1 px-3 py-1.5 rounded-lg border text-sm font-mono"
-                    style={{
-                      backgroundColor: "var(--background)",
-                      borderColor: "var(--card-border)",
-                      color: "var(--text-primary)",
-                    }}
-                  />
-                  <button
-                    onClick={() => handleSavePassword(user.id)}
-                    disabled={saving[user.id] || !changed}
-                    className="px-3 py-1.5 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40"
-                    style={{ background: "var(--gradient-primary)" }}
-                  >
-                    {saving[user.id] ? "..." : saved[user.id] ? "Saved" : "Save"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
