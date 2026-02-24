@@ -1,4 +1,4 @@
-# M&M Movie Awards
+# Mandem Movie Awards
 
 A private web app for tracking which movies friends have watched together and running end-of-year awards voting.
 
