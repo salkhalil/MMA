@@ -78,6 +78,7 @@ model Person {
   tmdbId       Int           @unique
   name         String
   photoPath    String?
+  gender       Int?
   createdAt    DateTime      @default(now())
   movieCredits MovieCredit[]
 }

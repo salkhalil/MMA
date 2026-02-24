@@ -16,11 +16,12 @@ export async function ingestCreditsForMovie(
   for (const member of topCast) {
     const person = await prisma.person.upsert({
       where: { tmdbId: member.id },
-      update: { name: member.name, photoPath: member.profile_path },
+      update: { name: member.name, photoPath: member.profile_path, gender: member.gender },
       create: {
         tmdbId: member.id,
         name: member.name,
         photoPath: member.profile_path,
+        gender: member.gender,
       },
     });
 

@@ -47,6 +47,7 @@ export interface Person {
   tmdbId: number;
   name: string;
   photoPath: string | null;
+  gender?: number | null;
 }
 
 export interface MovieCredit {

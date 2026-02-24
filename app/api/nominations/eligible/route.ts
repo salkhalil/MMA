@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+type ActorFilter = { gender: number; orderFilter: { lte: number } | { gte: number } };
+
+function getActorFilter(categoryName: string): ActorFilter | null {
+  const map: Record<string, ActorFilter> = {
+    "Best Actor": { gender: 2, orderFilter: { lte: 2 } },
+    "Best Actress": { gender: 1, orderFilter: { lte: 2 } },
+    "Best Supporting Actor": { gender: 2, orderFilter: { gte: 3 } },
+    "Best Supporting Actress": { gender: 1, orderFilter: { gte: 3 } },
+  };
+  return map[categoryName] ?? null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -42,19 +54,37 @@ export async function GET(request: NextRequest) {
 
     // ACTOR or DIRECTOR
     const role = category.type === "ACTOR" ? "ACTOR" : "DIRECTOR";
+
+    // Actor category filtering by gender + lead/supporting
+    const actorFilter = getActorFilter(category.name);
+
     const credits = await prisma.movieCredit.findMany({
       where: {
         role,
         movie: validMovieWhere,
+        ...(actorFilter?.gender != null && { person: { is: { gender: actorFilter.gender } } }),
+        ...(actorFilter?.orderFilter != null && { order: actorFilter.orderFilter }),
       },
       include: {
         person: true,
         movie: { include: { movieViews: true } },
       },
-      orderBy: { person: { name: "asc" } },
+      orderBy: [{ order: "asc" }, { person: { name: "asc" } }],
     });
 
-    const eligible = credits.filter((c) => c.movie.movieViews.length >= 2);
+    let eligible = credits.filter((c) => c.movie.movieViews.length >= 2);
+
+    // Limit to 5 per movie for actor categories
+    if (actorFilter) {
+      const byMovie = new Map<number, typeof eligible>();
+      for (const c of eligible) {
+        const group = byMovie.get(c.movieId) ?? [];
+        group.push(c);
+        byMovie.set(c.movieId, group);
+      }
+      eligible = Array.from(byMovie.values()).flatMap((g) => g.slice(0, 5));
+    }
+
     return NextResponse.json(eligible);
   } catch (error: unknown) {
     console.error("Error fetching eligible items:", error);

@@ -44,6 +44,7 @@ export interface TMDBCredits {
     name: string;
     character: string;
     order: number;
+    gender: number;
     profile_path: string | null;
   }>;
   crew: Array<{
