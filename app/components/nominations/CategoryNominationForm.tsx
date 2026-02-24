@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { Category, Movie, MovieCredit, RankedItem, Nomination } from "@/types";
 import { MAX_NOMINATIONS_PER_CATEGORY } from "@/lib/config";
 import EligibleItemCard from "./EligibleItemCard";
@@ -85,21 +86,61 @@ export default function CategoryNominationForm({
     );
   }, [rankedItems, isFilm]);
 
-  // Filtered eligible items
+  // Filtered + sorted eligible items (most-watched first)
   const filtered = useMemo(() => {
-    if (!search.trim()) return eligibleItems;
-    const q = search.toLowerCase();
-    return eligibleItems.filter((item) => {
-      if (isFilm) {
-        return (item as EligibleFilm).title.toLowerCase().includes(q);
-      }
-      const credit = item as EligibleCredit;
-      return (
-        credit.person?.name.toLowerCase().includes(q) ||
-        credit.movie.title.toLowerCase().includes(q)
-      );
+    let items = eligibleItems;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      items = items.filter((item) => {
+        if (isFilm) {
+          return (item as EligibleFilm).title.toLowerCase().includes(q);
+        }
+        const credit = item as EligibleCredit;
+        return (
+          credit.person?.name.toLowerCase().includes(q) ||
+          credit.movie.title.toLowerCase().includes(q)
+        );
+      });
+    }
+    return [...items].sort((a, b) => {
+      const viewsA = isFilm
+        ? (a as EligibleFilm).movieViews.length
+        : (a as EligibleCredit).movie.movieViews.length;
+      const viewsB = isFilm
+        ? (b as EligibleFilm).movieViews.length
+        : (b as EligibleCredit).movie.movieViews.length;
+      if (viewsB !== viewsA) return viewsB - viewsA;
+      const titleA = isFilm
+        ? (a as EligibleFilm).title
+        : (a as EligibleCredit).movie.title;
+      const titleB = isFilm
+        ? (b as EligibleFilm).title
+        : (b as EligibleCredit).movie.title;
+      return titleA.localeCompare(titleB);
     });
   }, [eligibleItems, search, isFilm]);
+
+  // Group credits by movie for ACTOR/DIRECTOR categories
+  const groupedByMovie = useMemo(() => {
+    if (isFilm) return null;
+    const groups = new Map<
+      number,
+      { movie: Movie & { movieViews: { id: number }[] }; credits: EligibleCredit[] }
+    >();
+    for (const item of filtered) {
+      const credit = item as EligibleCredit;
+      const movieId = credit.movie.id;
+      if (!groups.has(movieId)) {
+        groups.set(movieId, { movie: credit.movie, credits: [] });
+      }
+      groups.get(movieId)!.credits.push(credit);
+    }
+    return [...groups.values()].sort((a, b) => {
+      const diff = b.movie.movieViews.length - a.movie.movieViews.length;
+      if (diff !== 0) return diff;
+      return a.movie.title.localeCompare(b.movie.title);
+    });
+  }, [filtered, isFilm]);
 
   const addItem = useCallback(
     (item: EligibleFilm | EligibleCredit) => {
@@ -213,8 +254,8 @@ export default function CategoryNominationForm({
 
       {/* Two-panel layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: eligible items */}
-        <div className="space-y-3">
+        {/* Left: eligible items (below on mobile) */}
+        <div className="space-y-3 order-2 lg:order-1">
           <input
             type="text"
             placeholder={
@@ -239,23 +280,14 @@ export default function CategoryNominationForm({
               >
                 No eligible items found
               </p>
-            ) : (
+            ) : isFilm ? (
               filtered.map((item) => {
-                const id = isFilm
-                  ? (item as EligibleFilm).id
-                  : (item as EligibleCredit).id;
-                const isSelected = selectedIds.has(id);
+                const movie = item as EligibleFilm;
+                const isSelected = selectedIds.has(movie.id);
                 return (
                   <EligibleItemCard
-                    key={id}
-                    item={
-                      isFilm
-                        ? { type: "FILM" as const, movie: item as EligibleFilm }
-                        : {
-                            type: category.type as "ACTOR" | "DIRECTOR",
-                            credit: item as EligibleCredit,
-                          }
-                    }
+                    key={movie.id}
+                    item={{ type: "FILM" as const, movie }}
                     selected={isSelected}
                     disabled={
                       locked ||
@@ -265,12 +297,89 @@ export default function CategoryNominationForm({
                   />
                 );
               })
+            ) : (
+              groupedByMovie!.map((group) => (
+                <div key={group.movie.id} className="space-y-1">
+                  {/* Movie group header */}
+                  <div
+                    className="flex items-center gap-2 px-2 pt-3 pb-1"
+                  >
+                    {group.movie.posterPath ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w92${group.movie.posterPath}`}
+                        alt={group.movie.title}
+                        width={28}
+                        height={42}
+                        className="rounded flex-shrink-0"
+                      />
+                    ) : (
+                      <div
+                        className="flex-shrink-0 rounded flex items-center justify-center text-[10px] font-bold"
+                        style={{
+                          width: 28,
+                          height: 42,
+                          background: "var(--gradient-primary)",
+                          color: "white",
+                        }}
+                      >
+                        {group.movie.title.charAt(0)}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className="font-semibold text-xs truncate"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {group.movie.title}
+                        {group.movie.year && (
+                          <span
+                            className="font-normal ml-1"
+                            style={{ color: "var(--text-tertiary)" }}
+                          >
+                            ({group.movie.year})
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    {group.movie.movieViews.length > 0 && (
+                      <span
+                        className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        style={{
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--primary)",
+                        }}
+                      >
+                        {group.movie.movieViews.length} watched
+                      </span>
+                    )}
+                  </div>
+                  {/* Credits under this movie */}
+                  {group.credits.map((credit) => {
+                    const isSelected = selectedIds.has(credit.id);
+                    return (
+                      <EligibleItemCard
+                        key={credit.id}
+                        item={{
+                          type: category.type as "ACTOR" | "DIRECTOR",
+                          credit,
+                        }}
+                        selected={isSelected}
+                        disabled={
+                          locked ||
+                          (!isSelected && rankedItems.length >= MAX_NOMINATIONS_PER_CATEGORY)
+                        }
+                        onSelect={() => addItem(credit)}
+                      />
+                    );
+                  })}
+                </div>
+              ))
             )}
           </div>
         </div>
 
-        {/* Right: ranked list */}
-        <div className="lg:sticky lg:top-24 lg:self-start space-y-4">
+        {/* Right: ranked list (above on mobile) */}
+        <div className="order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start space-y-4">
           <h3
             className="font-bold text-lg"
             style={{ color: "var(--text-primary)" }}
