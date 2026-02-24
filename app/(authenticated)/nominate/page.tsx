@@ -30,6 +30,7 @@ export default function NominatePage() {
         fetch("/api/categories"),
         fetch(`/api/nominations/status?userId=${currentUserId}`),
       ]);
+      if (!catRes.ok || !statusRes.ok) throw new Error("Failed to load data");
       const cats: Category[] = await catRes.json();
       const status: NominationStatus = await statusRes.json();
       setCategories(cats);

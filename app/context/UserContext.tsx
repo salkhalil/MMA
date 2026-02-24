@@ -81,6 +81,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [currentUserId]);
 
   useEffect(() => {
+    checkSession();
     window.addEventListener("focus", checkSession);
     return () => window.removeEventListener("focus", checkSession);
   }, [checkSession]);

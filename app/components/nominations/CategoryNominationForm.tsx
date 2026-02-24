@@ -45,8 +45,14 @@ export default function CategoryNominationForm({
     setError(null);
 
     Promise.all([
-      fetch(`/api/nominations/eligible?categoryId=${category.id}`).then((r) => r.json()),
-      fetch(`/api/nominations?userId=${userId}&categoryId=${category.id}`).then((r) => r.json()),
+      fetch(`/api/nominations/eligible?categoryId=${category.id}`).then((r) => {
+        if (!r.ok) throw new Error("Failed to load eligible items");
+        return r.json();
+      }),
+      fetch(`/api/nominations?userId=${userId}&categoryId=${category.id}`).then((r) => {
+        if (!r.ok) throw new Error("Failed to load nominations");
+        return r.json();
+      }),
     ])
       .then(([eligible, existing]) => {
         if (cancelled) return;
