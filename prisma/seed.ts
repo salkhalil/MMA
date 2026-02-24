@@ -42,6 +42,18 @@ async function main() {
     console.log(`✓ Category: ${category.name}`);
   }
 
+  // Movies with pool ALL (eligible in all categories)
+  const allPoolMovies = ["There Will Be Blood"];
+  console.log("\nSetting ALL-pool overrides...");
+  for (const title of allPoolMovies) {
+    const updated = await prisma.movie.updateMany({
+      where: { title },
+      data: { pool: "ALL" },
+    });
+    if (updated.count > 0) console.log(`✓ ${title} → ALL`);
+    else console.log(`⏭ ${title} — not found`);
+  }
+
   // Backfill credits for existing movies
   console.log("\nBackfilling credits for existing movies...");
 
