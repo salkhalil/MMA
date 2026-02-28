@@ -48,7 +48,15 @@ export async function GET(request: NextRequest) {
         orderBy: { title: "asc" },
       });
 
-      const eligible = movies.filter((m) => m.movieViews.length >= 2);
+      let eligible = movies.filter((m) => m.movieViews.length >= 2);
+
+      // Foreign language filter: exclude English-language films
+      if (category.name === "Best Foreign Language Film") {
+        eligible = eligible.filter(
+          (m) => m.originalLanguage && m.originalLanguage !== "en"
+        );
+      }
+
       return NextResponse.json(eligible);
     }
 

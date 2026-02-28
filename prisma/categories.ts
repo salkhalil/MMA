@@ -24,6 +24,12 @@ export const categories = [
     pool: MoviePool.NEW_RELEASE,
   },
 
+  {
+    name: "Best Foreign Language Film",
+    type: CategoryType.FILM,
+    pool: MoviePool.NEW_RELEASE,
+  },
+
   // Actor categories
   { name: "Best Actor", type: CategoryType.ACTOR, pool: MoviePool.NEW_RELEASE },
   {
