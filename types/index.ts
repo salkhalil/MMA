@@ -16,6 +16,7 @@ export interface Movie {
   year: number | null;
   posterPath: string | null;
   overview: string | null;
+  originalLanguage: string | null;
   pool: MoviePool;
   createdAt: string;
   movieViews: MovieView[];
@@ -40,6 +41,7 @@ export interface TMDBMovie {
   poster_path: string | null;
   overview: string;
   vote_average: number;
+  original_language: string;
 }
 
 export interface Person {
@@ -98,5 +100,6 @@ export interface MovieSuggestionData {
   year: number | null;
   posterPath: string | null;
   overview: string;
+  originalLanguage: string;
   viewerIds: number[];
 }

@@ -8,6 +8,7 @@ export interface TMDBMovie {
   poster_path: string | null;
   overview: string;
   vote_average: number;
+  original_language: string;
 }
 
 export interface TMDBSearchResponse {

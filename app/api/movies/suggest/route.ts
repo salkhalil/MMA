@@ -8,13 +8,14 @@ interface SuggestMovieRequest {
   year?: number;
   posterPath?: string | null;
   overview?: string;
+  originalLanguage?: string;
   viewerIds: number[];
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as SuggestMovieRequest;
-    const { tmdbId, title, year, posterPath, overview, viewerIds } = body;
+    const { tmdbId, title, year, posterPath, overview, originalLanguage, viewerIds } = body;
 
     if (!tmdbId || !title || !viewerIds || viewerIds.length === 0) {
       return NextResponse.json(
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
           year,
           posterPath,
           overview,
+          originalLanguage,
           pool: year && year >= 2025 ? "NEW_RELEASE" : "CLASSIC",
           movieViews: {
             create: viewerIds.map((userId: number) => ({

@@ -56,6 +56,7 @@ export default function AddMovieModal({
         year,
         posterPath: movie.poster_path,
         overview: movie.overview,
+        originalLanguage: movie.original_language,
         viewerIds: selectedUserIds,
       });
       onClose();

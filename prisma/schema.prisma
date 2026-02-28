@@ -28,8 +28,9 @@ model Movie {
   title      String
   year       Int?
   posterPath String?
-  overview   String?
-  pool       MoviePool     @default(CLASSIC)
+  overview          String?
+  originalLanguage  String?
+  pool              MoviePool     @default(CLASSIC)
   createdAt  DateTime      @default(now())
   movieViews   MovieView[]
   credits      MovieCredit[]
