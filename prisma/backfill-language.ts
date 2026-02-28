@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { prisma } from "@/lib/prisma";
 
 const TMDB_API_KEY = process.env.TMDB_API_KEY || "";
-const prisma = new PrismaClient();
 
 async function backfill() {
   const movies = await prisma.movie.findMany({
@@ -14,10 +14,12 @@ async function backfill() {
   for (const movie of movies) {
     try {
       const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.tmdbId}?api_key=${TMDB_API_KEY}`
+        `https://api.themoviedb.org/3/movie/${movie.tmdbId}?api_key=${TMDB_API_KEY}`,
       );
       if (!res.ok) {
-        console.error(`Failed for ${movie.title} (${movie.tmdbId}): ${res.status}`);
+        console.error(
+          `Failed for ${movie.title} (${movie.tmdbId}): ${res.status}`,
+        );
         continue;
       }
       const data = await res.json();
