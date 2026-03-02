@@ -16,6 +16,8 @@ async function main() {
       { name: "Henry", password: "goldfish" },
       { name: "Jake", password: "thunder" },
       { name: "Tom", password: "wildcard" },
+      { name: "Kaj", password: "jan" },
+      { name: "Fili", password: "pipo" },
       { name: "Khaled", password: "legend", role: "ADMIN" },
     ];
 
