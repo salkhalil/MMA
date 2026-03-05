@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth";
-import { isNominationsLocked } from "@/lib/config";
+import { isNominationsLocked } from "@/lib/nominations";
 
 const NOMINATION_INCLUDE = {
   movie: true,
