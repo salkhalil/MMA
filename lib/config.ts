@@ -1,10 +1,17 @@
-function parseDeadline(): Date {
-  const raw = process.env.NEXT_PUBLIC_NOMINATIONS_DEADLINE;
-  if (!raw) return new Date("2099-01-01");
-  const [day, month, year] = raw.split("/").map(Number);
+import { prisma } from "@/lib/prisma";
+
+export const MAX_NOMINATIONS_PER_CATEGORY = 5;
+
+export async function getNominationsDeadline(): Promise<Date> {
+  const setting = await prisma.setting.findUnique({
+    where: { key: "nominations_deadline" },
+  });
+  if (!setting?.value) return new Date("2099-01-01");
+  const [day, month, year] = setting.value.split("/").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
 }
 
-export const NOMINATIONS_DEADLINE = parseDeadline();
-export const MAX_NOMINATIONS_PER_CATEGORY = 5;
-export const isNominationsLocked = () => new Date() > NOMINATIONS_DEADLINE;
+export async function isNominationsLocked(): Promise<boolean> {
+  const deadline = await getNominationsDeadline();
+  return new Date() > deadline;
+}

@@ -76,6 +76,22 @@ async function main() {
     }
   }
 
+  // Seed nominations deadline from env if not already set
+  const deadlineEnv = process.env.NEXT_PUBLIC_NOMINATIONS_DEADLINE;
+  if (deadlineEnv) {
+    const existing = await prisma.setting.findUnique({
+      where: { key: "nominations_deadline" },
+    });
+    if (!existing) {
+      await prisma.setting.create({
+        data: { key: "nominations_deadline", value: deadlineEnv },
+      });
+      console.log(`✓ Setting: nominations_deadline = ${deadlineEnv}`);
+    } else {
+      console.log(`⏭ nominations_deadline already set`);
+    }
+  }
+
   console.log("\nSeeding complete!");
 }
 

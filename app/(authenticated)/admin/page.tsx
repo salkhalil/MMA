@@ -14,7 +14,7 @@ interface AdminUser {
   totalNominations: number;
 }
 
-type Tab = "users" | "progress";
+type Tab = "users" | "progress" | "settings";
 
 const ROLE_OPTIONS = Object.values(Role);
 
@@ -37,6 +37,11 @@ export default function AdminPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
 
+  // Settings
+  const [nominationsDeadline, setNominationsDeadline] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
   useEffect(() => {
     if (currentUser && !isAdmin) {
       router.push("/add");
@@ -45,9 +50,10 @@ export default function AdminPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [usersRes, catsRes] = await Promise.all([
+      const [usersRes, catsRes, settingsRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/categories"),
+        fetch("/api/admin/settings"),
       ]);
       if (!usersRes.ok) return;
       const usersData = await usersRes.json();
@@ -62,6 +68,15 @@ export default function AdminPage() {
       });
       setPasswords(pw);
       setRoles(rl);
+
+      if (settingsRes.ok) {
+        const settings = await settingsRes.json();
+        if (settings.nominations_deadline) {
+          // Convert dd/mm/yyyy to yyyy-mm-dd for input[type=date]
+          const [day, month, year] = settings.nominations_deadline.split("/");
+          setNominationsDeadline(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -126,6 +141,47 @@ export default function AdminPage() {
     }
   };
 
+  const handleSaveDeadline = async () => {
+    if (!nominationsDeadline) return;
+    setSavingSettings(true);
+    setSettingsSaved(false);
+    try {
+      // Convert yyyy-mm-dd to dd/mm/yyyy
+      const [year, month, day] = nominationsDeadline.split("-");
+      const value = `${day}/${month}/${year}`;
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "nominations_deadline", value }),
+      });
+      if (res.ok) {
+        setSettingsSaved(true);
+        setTimeout(() => setSettingsSaved(false), 2000);
+      }
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleClearDeadline = async () => {
+    setSavingSettings(true);
+    setSettingsSaved(false);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "nominations_deadline", value: "" }),
+      });
+      if (res.ok) {
+        setNominationsDeadline("");
+        setSettingsSaved(true);
+        setTimeout(() => setSettingsSaved(false), 2000);
+      }
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   if (!isAdmin || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -144,6 +200,7 @@ export default function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "progress", label: "Progress" },
     { key: "users", label: "Users" },
+    { key: "settings", label: "Settings" },
   ];
 
   return (
@@ -251,6 +308,62 @@ export default function AdminPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Settings tab */}
+      {tab === "settings" && (
+        <div className="space-y-6">
+          <div
+            className="rounded-xl border p-5"
+            style={{ backgroundColor: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
+              Nominations Deadline
+            </h2>
+            <p className="text-xs mb-4" style={{ color: "var(--text-secondary)" }}>
+              Set the date when nominations close. Leave empty to keep nominations open indefinitely.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="date"
+                value={nominationsDeadline}
+                onChange={(e) => setNominationsDeadline(e.target.value)}
+                className="flex-1 px-3 py-1.5 rounded-lg border text-sm"
+                style={{
+                  backgroundColor: "var(--background)",
+                  borderColor: "var(--card-border)",
+                  color: "var(--text-primary)",
+                }}
+              />
+              <button
+                onClick={handleSaveDeadline}
+                disabled={savingSettings || !nominationsDeadline}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40 shrink-0"
+                style={{ background: "var(--gradient-primary)" }}
+              >
+                {savingSettings ? "..." : settingsSaved ? "Saved" : "Save"}
+              </button>
+              <button
+                onClick={handleClearDeadline}
+                disabled={savingSettings || !nominationsDeadline}
+                className="px-4 py-1.5 rounded-lg text-sm font-medium transition-all disabled:opacity-40 shrink-0 border"
+                style={{
+                  borderColor: "var(--card-border)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                Clear
+              </button>
+            </div>
+            {nominationsDeadline && (
+              <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
+                {new Date() > new Date(nominationsDeadline + "T00:00:00Z")
+                  ? "Nominations are currently closed."
+                  : "Nominations are currently open."}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

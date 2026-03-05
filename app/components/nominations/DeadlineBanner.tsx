@@ -1,13 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-const DEADLINE = (() => {
-  const raw = process.env.NEXT_PUBLIC_NOMINATIONS_DEADLINE;
-  if (!raw) return new Date("2099-01-01");
-  const [day, month, year] = raw.split("/").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
-})();
+import { useState, useEffect, useCallback } from "react";
 
 function getTimeLeft(deadline: Date) {
   const diff = deadline.getTime() - Date.now();
@@ -20,13 +13,40 @@ function getTimeLeft(deadline: Date) {
   };
 }
 
+function parseDeadline(raw: string): Date {
+  const [day, month, year] = raw.split("/").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 export default function DeadlineBanner() {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(DEADLINE));
+  const [deadline, setDeadline] = useState<Date | null>(null);
+  const [timeLeft, setTimeLeft] = useState<ReturnType<typeof getTimeLeft>>(null);
+
+  const fetchDeadline = useCallback(async () => {
+    try {
+      const res = await fetch("/api/settings/nominations-deadline");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.deadline) {
+        setDeadline(parseDeadline(data.deadline));
+      }
+    } catch {
+      // silent fail
+    }
+  }, []);
 
   useEffect(() => {
-    const id = setInterval(() => setTimeLeft(getTimeLeft(DEADLINE)), 1000);
+    fetchDeadline();
+  }, [fetchDeadline]);
+
+  useEffect(() => {
+    if (!deadline) return;
+    setTimeLeft(getTimeLeft(deadline));
+    const id = setInterval(() => setTimeLeft(getTimeLeft(deadline)), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [deadline]);
+
+  if (!deadline) return null;
 
   if (!timeLeft) {
     return (

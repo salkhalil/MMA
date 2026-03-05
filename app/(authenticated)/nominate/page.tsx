@@ -7,34 +7,36 @@ import DeadlineBanner from "@/app/components/nominations/DeadlineBanner";
 import CategoryList from "@/app/components/nominations/CategoryList";
 import CategoryNominationForm from "@/app/components/nominations/CategoryNominationForm";
 
-const DEADLINE = (() => {
-  const raw = process.env.NEXT_PUBLIC_NOMINATIONS_DEADLINE;
-  if (!raw) return new Date("2099-01-01");
-  const [day, month, year] = raw.split("/").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
-})();
-
 export default function NominatePage() {
   const { currentUserId } = useUser();
   const [categories, setCategories] = useState<Category[]>([]);
   const [completedIds, setCompletedIds] = useState<Set<number>>(new Set());
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const locked = new Date() > DEADLINE;
+  const [locked, setLocked] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!currentUserId) return;
     try {
-      const [catRes, statusRes] = await Promise.all([
+      const [catRes, statusRes, deadlineRes] = await Promise.all([
         fetch("/api/categories"),
         fetch(`/api/nominations/status?userId=${currentUserId}`),
+        fetch("/api/settings/nominations-deadline"),
       ]);
       if (!catRes.ok || !statusRes.ok) throw new Error("Failed to load data");
       const cats: Category[] = await catRes.json();
       const status: NominationStatus = await statusRes.json();
       setCategories(cats);
       setCompletedIds(new Set(status.completedCategoryIds ?? []));
+
+      if (deadlineRes.ok) {
+        const { deadline } = await deadlineRes.json();
+        if (deadline) {
+          const [day, month, year] = deadline.split("/").map(Number);
+          const d = new Date(Date.UTC(year, month - 1, day));
+          setLocked(new Date() > d);
+        }
+      }
     } catch {
       // silent fail — data will be empty
     } finally {
