@@ -1,6 +1,6 @@
 # Mandem Movie Awards
 
-A private web app for tracking which movies friends have watched together and running end-of-year awards voting.
+A NextJS web app for tracking which movies friends have watched together and running end-of-year awards voting.
 
 ## Stack
 
