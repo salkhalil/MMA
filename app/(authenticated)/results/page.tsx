@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useUser } from "@/app/context/UserContext";
 import { Category, MoviePool } from "@/types";
 import { IRVResult } from "@/lib/irv";
@@ -128,6 +129,18 @@ export default function ResultsPage() {
           >
             The people have spoken
           </p>
+          <Link
+            href="/results/showcase"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm text-white transition-all hover:scale-105 shadow-lg"
+            style={{
+              background: "var(--gradient-warm)",
+            }}
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Showcase
+          </Link>
         </header>
 
         {pools.map((pool) => {

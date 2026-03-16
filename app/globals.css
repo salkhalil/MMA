@@ -218,6 +218,35 @@ input[type="checkbox"]:focus {
   animation: winnerReveal 0.6s ease-out forwards;
 }
 
+/* Showcase animations */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes categoryIntro {
+  0% { opacity: 0; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.categoryIntro {
+  animation: categoryIntro 0.8s ease-out forwards;
+}
+
+@keyframes slideInRight {
+  0% { opacity: 0; transform: translateX(20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.slideInRight {
+  animation: slideInRight 0.4s ease-out forwards;
+}
+
 /* Custom scale utilities */
 .scale-102 {
   transform: scale(1.02);
