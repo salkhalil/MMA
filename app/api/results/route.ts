@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getVerifiedUserId } from "@/lib/auth";
 import { runIRV } from "@/lib/irv";
 import { nominationsToBallots, buildNomineeMap } from "@/lib/irv-helpers";
-import { isNominationsLocked } from "@/lib/nominations";
 
 const NOMINATION_INCLUDE = {
   movie: true,
@@ -22,10 +21,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    // Check if user is admin or nominations are locked
-    const user = await prisma.user.findUnique({ where: { id: verifiedUserId } });
-    const locked = await isNominationsLocked();
-    if (!locked && user?.role !== "ADMIN") {
+    // Check if user is admin or results are visible
+    const [user, resultsSetting] = await Promise.all([
+      prisma.user.findUnique({ where: { id: verifiedUserId } }),
+      prisma.setting.findUnique({ where: { key: "results_visible" } }),
+    ]);
+    const resultsVisible = resultsSetting?.value === "true";
+    if (!resultsVisible && user?.role !== "ADMIN") {
       return NextResponse.json(
         { error: "Results not available yet" },
         { status: 403 }
