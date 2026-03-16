@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, memo } from "react";
+import { useState, useRef, useEffect, memo, useMemo } from "react";
 import { useUser } from "@/app/context/UserContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -11,9 +11,19 @@ function Navigation() {
   const { currentUser, users, setCurrentUserId, verifyAndSetUser, isAdmin } = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<number | null>(null);
+  const [resultsVisible, setResultsVisible] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    fetch("/api/settings/results-visible")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setResultsVisible(data.visible); })
+      .catch(() => {});
+  }, []);
+
+  const showResults = useMemo(() => isAdmin || resultsVisible, [isAdmin, resultsVisible]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -132,6 +142,23 @@ function Navigation() {
             >
               Gallery
             </Link>
+            {showResults && (
+              <Link
+                href="/results"
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  pathname === "/results"
+                    ? "text-white shadow-md"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+                style={
+                  pathname === "/results"
+                    ? { background: "var(--gradient-warm)" }
+                    : { color: "var(--text-primary)" }
+                }
+              >
+                Results
+              </Link>
+            )}
             {isAdmin && (
               <Link
                 href="/admin"
