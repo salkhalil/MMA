@@ -74,7 +74,7 @@ export default function ShowcaseStage({
           className="text-xl animate-fade-in-up"
           style={{ color: "#c4b5e8" }}
         >
-          {isDraw ? "It&apos;s a draw..." : "And the winner is..."}
+          {isDraw ? "It's a draw..." : "And the winner is..."}
         </p>
 
         <div className="winnerReveal space-y-4">

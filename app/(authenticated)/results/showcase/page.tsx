@@ -33,7 +33,9 @@ export default function ShowcasePage() {
     { category: Category; winner: NomineeInfo | null; isDraw: boolean; drawNames: string }[]
   >([]);
 
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const introTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const confettiFired = useRef(false);
 
   // Fetch results
@@ -60,41 +62,48 @@ export default function ShowcasePage() {
   const isBestPicture = current?.category.name === "Best Picture";
   const isLastCategory = categoryIndex === results.length - 1;
 
-  // Clear timer on unmount
+  // Clear timers on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (introTimerRef.current) clearTimeout(introTimerRef.current);
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     };
   }, []);
 
   // Intro phase auto-advance
   useEffect(() => {
     if (phase === "intro") {
-      timerRef.current = setTimeout(() => {
-        setPhase("rounds");
-        setRoundIndex(0);
+      introTimerRef.current = setTimeout(() => {
+        if (totalRounds === 0) {
+          setPhase("winner");
+          confettiFired.current = false;
+        } else {
+          setPhase("rounds");
+          setRoundIndex(0);
+        }
       }, 1500);
     }
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (introTimerRef.current) clearTimeout(introTimerRef.current);
     };
-  }, [phase, categoryIndex]);
+  }, [phase, categoryIndex, totalRounds]);
 
   // Auto-advance rounds
   useEffect(() => {
-    if (phase === "rounds" && roundIndex < totalRounds - 1) {
-      timerRef.current = setTimeout(() => {
+    if (phase !== "rounds" || totalRounds === 0) return;
+    if (roundIndex < totalRounds - 1) {
+      roundTimerRef.current = setTimeout(() => {
         setRoundIndex((r) => r + 1);
       }, 2500);
-    } else if (phase === "rounds" && roundIndex === totalRounds - 1) {
-      // Last round reached — move to winner
-      timerRef.current = setTimeout(() => {
+    } else {
+      roundTimerRef.current = setTimeout(() => {
         setPhase("winner");
         confettiFired.current = false;
       }, 2500);
     }
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
     };
   }, [phase, roundIndex, totalRounds]);
 
@@ -114,14 +123,19 @@ export default function ShowcasePage() {
     if (!current) return;
 
     if (phase === "intro") {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      setPhase("rounds");
-      setRoundIndex(0);
+      if (introTimerRef.current) clearTimeout(introTimerRef.current);
+      if (totalRounds === 0) {
+        setPhase("winner");
+        confettiFired.current = false;
+      } else {
+        setPhase("rounds");
+        setRoundIndex(0);
+      }
       return;
     }
 
     if (phase === "rounds") {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
       if (roundIndex < totalRounds - 1) {
         setRoundIndex((r) => r + 1);
       } else {
@@ -132,7 +146,6 @@ export default function ShowcasePage() {
     }
 
     if (phase === "winner") {
-      // Record winner and move to next category
       const result = current.result;
       const winnerInfo = result.winner ? current.nominees[result.winner] : null;
       setRevealedWinners((prev) => [
@@ -147,10 +160,10 @@ export default function ShowcasePage() {
         },
       ]);
 
-      if (isLastCategory) return; // Stay on final winner
+      if (isLastCategory) return;
 
       setPhase("transition");
-      timerRef.current = setTimeout(() => {
+      transitionTimerRef.current = setTimeout(() => {
         setCategoryIndex((i) => i + 1);
         setPhase("intro");
         setRoundIndex(0);
@@ -161,15 +174,18 @@ export default function ShowcasePage() {
 
   const goBack = useCallback(() => {
     if (phase === "rounds" && roundIndex > 0) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
       setRoundIndex((r) => r - 1);
     } else if (phase === "rounds" && roundIndex === 0) {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (roundTimerRef.current) clearTimeout(roundTimerRef.current);
       setPhase("intro");
     } else if (phase === "winner") {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      setPhase("rounds");
-      setRoundIndex(totalRounds - 1);
+      if (totalRounds > 0) {
+        setPhase("rounds");
+        setRoundIndex(totalRounds - 1);
+      } else {
+        setPhase("intro");
+      }
     }
   }, [phase, roundIndex, totalRounds]);
 
