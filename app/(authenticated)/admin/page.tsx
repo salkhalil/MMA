@@ -41,6 +41,8 @@ export default function AdminPage() {
   const [nominationsDeadline, setNominationsDeadline] = useState("");
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsSaved, setSettingsSaved] = useState(false);
+  const [resultsVisible, setResultsVisible] = useState(false);
+  const [savingResults, setSavingResults] = useState(false);
 
   useEffect(() => {
     if (currentUser && !isAdmin) {
@@ -72,10 +74,10 @@ export default function AdminPage() {
       if (settingsRes.ok) {
         const settings = await settingsRes.json();
         if (settings.nominations_deadline) {
-          // Convert dd/mm/yyyy to yyyy-mm-dd for input[type=date]
           const [day, month, year] = settings.nominations_deadline.split("/");
           setNominationsDeadline(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`);
         }
+        setResultsVisible(settings.results_visible === "true");
       }
     } finally {
       setLoading(false);
@@ -179,6 +181,20 @@ export default function AdminPage() {
       }
     } finally {
       setSavingSettings(false);
+    }
+  };
+
+  const handleToggleResults = async () => {
+    setSavingResults(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "results_visible", value: (!resultsVisible).toString() }),
+      });
+      if (res.ok) setResultsVisible(!resultsVisible);
+    } finally {
+      setSavingResults(false);
     }
   };
 
@@ -363,6 +379,29 @@ export default function AdminPage() {
                   : "Nominations are currently open."}
               </p>
             )}
+          </div>
+
+          {/* Results Visibility */}
+          <div
+            className="rounded-xl border p-5"
+            style={{ backgroundColor: "var(--card-bg)", borderColor: "var(--card-border)" }}
+          >
+            <h2 className="font-semibold text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
+              Results Visibility
+            </h2>
+            <p className="text-xs mb-4" style={{ color: "var(--text-secondary)" }}>
+              Toggle whether results are visible to all users. Admins can always see results.
+            </p>
+            <button
+              onClick={handleToggleResults}
+              disabled={savingResults}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40"
+              style={{
+                background: resultsVisible ? "var(--gradient-warm)" : "var(--gradient-primary)",
+              }}
+            >
+              {savingResults ? "..." : resultsVisible ? "Results Visible — Click to Hide" : "Results Hidden — Click to Show"}
+            </button>
           </div>
         </div>
       )}
