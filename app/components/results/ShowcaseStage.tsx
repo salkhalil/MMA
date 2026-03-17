@@ -56,13 +56,20 @@ export default function ShowcaseStage({
     const winnerInfo = result.winner ? nominees[result.winner] : null;
     const isDraw = result.isDraw;
     const isPerson = category.type !== "FILM";
-    const heroImg = winnerInfo
-      ? isPerson && winnerInfo.photoPath
-        ? `https://image.tmdb.org/t/p/w300${winnerInfo.photoPath}`
-        : winnerInfo.posterPath
-        ? `https://image.tmdb.org/t/p/w300${winnerInfo.posterPath}`
-        : null
-      : null;
+
+    const getHeroImg = (info: NomineeInfo | null) => {
+      if (!info) return null;
+      if (isPerson && info.photoPath)
+        return `https://image.tmdb.org/t/p/w300${info.photoPath}`;
+      if (info.posterPath)
+        return `https://image.tmdb.org/t/p/w300${info.posterPath}`;
+      return null;
+    };
+
+    const heroImg = getHeroImg(winnerInfo);
+    const drawNominees = isDraw
+      ? result.drawBetween.map((id) => nominees[id]).filter(Boolean)
+      : [];
 
     return (
       <div className="w-full max-w-2xl mx-auto text-center space-y-6">
@@ -78,7 +85,8 @@ export default function ShowcaseStage({
         </p>
 
         <div className="winnerReveal space-y-4">
-          {heroImg && (
+          {/* Single winner image */}
+          {!isDraw && heroImg && (
             <div className="flex justify-center">
               <div
                 className="overflow-hidden shadow-2xl"
@@ -98,6 +106,34 @@ export default function ShowcaseStage({
             </div>
           )}
 
+          {/* Draw — show all tied nominees */}
+          {isDraw && drawNominees.length > 0 && (
+            <div className="flex justify-center gap-4 flex-wrap">
+              {drawNominees.map((info) => {
+                const img = getHeroImg(info);
+                if (!img) return null;
+                return (
+                  <div
+                    key={info.id}
+                    className="overflow-hidden shadow-2xl"
+                    style={{
+                      width: isPerson ? 130 : 110,
+                      height: isPerson ? 130 : 170,
+                      borderRadius: isPerson ? "50%" : 12,
+                      border: "3px solid #f59e0b",
+                    }}
+                  >
+                    <img
+                      src={img}
+                      alt={info.label}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <h2
             className="text-4xl sm:text-5xl font-bold shimmer"
             style={{
@@ -110,7 +146,7 @@ export default function ShowcaseStage({
             {winnerInfo
               ? winnerInfo.label
               : isDraw
-              ? result.drawBetween.map((id) => nominees[id]?.label).join(" & ")
+              ? drawNominees.map((n) => n.label).join(" & ")
               : "No winner"}
           </h2>
 
