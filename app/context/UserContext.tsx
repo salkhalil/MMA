@@ -45,7 +45,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch("/api/users");
         const data = await response.json();
-        setUsers(data);
+        setUsers(Array.isArray(data) ? data : []);
       } catch (error: unknown) {
         console.error("Error fetching users:", error);
       } finally {

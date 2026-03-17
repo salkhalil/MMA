@@ -13,7 +13,15 @@ interface Props {
   roundIndex: number;
 }
 
-function LetterStagger({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
+function LetterStagger({
+  text,
+  className,
+  style,
+}: {
+  text: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
   return (
     <span className={className} style={style}>
       {text.split("").map((char, i) => (
@@ -48,7 +56,10 @@ export default function ShowcaseStage({
   if (phase === "intro") {
     return (
       <div className="w-full max-w-2xl mx-auto text-center stagger-fade-in zoom-fade-in">
-        <p className="text-lg font-medium tracking-widest uppercase mb-4" style={{ color: "#8b80a8" }}>
+        <p
+          className="text-lg font-medium tracking-widest uppercase mb-4"
+          style={{ color: "#8b80a8" }}
+        >
           Presenting
         </p>
 
@@ -70,10 +81,11 @@ export default function ShowcaseStage({
 
         <div className="mt-6 space-y-1">
           <p className="text-sm font-medium" style={{ color: "#c4b5e8" }}>
-            {result.rounds.length} round{result.rounds.length !== 1 ? "s" : ""} of voting
+            {result.rounds.length} round{result.rounds.length !== 1 ? "s" : ""}{" "}
+            of voting
           </p>
           <p className="text-xs" style={{ color: "#6b5a8a" }}>
-            Instant Runoff Voting
+            Preferential Ballot Voting
           </p>
         </div>
       </div>
@@ -105,8 +117,8 @@ export default function ShowcaseStage({
     const winnerName = winnerInfo
       ? winnerInfo.label
       : isDraw
-      ? drawNominees.map((n) => n.label).join(" & ")
-      : "No winner";
+        ? drawNominees.map((n) => n.label).join(" & ")
+        : "No winner";
 
     return (
       <div className="w-full max-w-2xl mx-auto text-center space-y-6">
@@ -114,17 +126,21 @@ export default function ShowcaseStage({
           {category.name}
         </p>
 
-        <p
-          className="text-xl typewriter-label"
-          style={{ color: "#c4b5e8" }}
-        >
+        <p className="text-xl typewriter-label" style={{ color: "#c4b5e8" }}>
           {isDraw ? "It\u2019s a draw..." : "And the winner is..."}
         </p>
 
         <div className="space-y-4" style={{ animation: "none" }}>
           {/* Single winner image — delayed 0.8s */}
           {!isDraw && heroImg && (
-            <div className="flex justify-center" style={{ opacity: 0, animation: "springBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards" }}>
+            <div
+              className="flex justify-center"
+              style={{
+                opacity: 0,
+                animation:
+                  "springBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards",
+              }}
+            >
               <div
                 className="overflow-hidden shadow-2xl glowPulse"
                 style={{
@@ -174,7 +190,12 @@ export default function ShowcaseStage({
           )}
 
           {/* Winner name — letter stagger, delayed after image */}
-          <div style={{ opacity: 0, animation: `fadeInUp 0.5s ease-out ${isDraw ? 1.2 : 1.3}s forwards` }}>
+          <div
+            style={{
+              opacity: 0,
+              animation: `fadeInUp 0.5s ease-out ${isDraw ? 1.2 : 1.3}s forwards`,
+            }}
+          >
             <LetterStagger
               text={winnerName}
               className="text-4xl sm:text-5xl font-bold shimmer inline-block"
@@ -212,7 +233,7 @@ export default function ShowcaseStage({
   const isLastRound = roundIndex === totalRounds - 1;
 
   const sortedNominees = Object.entries(round.tallies).sort(
-    ([, a], [, b]) => b - a
+    ([, a], [, b]) => b - a,
   );
   const maxVotes = Math.max(...Object.values(round.tallies), 1);
 
@@ -231,7 +252,9 @@ export default function ShowcaseStage({
           className="text-sm font-medium uppercase tracking-wider mb-2 animate-fade-in-up"
           style={{ color: "#a78bfa" }}
         >
-          {isLastRound ? "Final Round" : `Elimination Round ${round.roundNumber}`}
+          {isLastRound
+            ? "Final Round"
+            : `Elimination Round ${round.roundNumber}`}
         </p>
         <h2
           className="text-3xl sm:text-4xl font-bold mb-2"
@@ -262,8 +285,8 @@ export default function ShowcaseStage({
           const state = isWinner
             ? ("winner" as const)
             : isEliminated
-            ? ("eliminated" as const)
-            : ("active" as const);
+              ? ("eliminated" as const)
+              : ("active" as const);
 
           return (
             <div
@@ -291,7 +314,10 @@ export default function ShowcaseStage({
             className="pt-3 mt-2 space-y-1"
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <p className="text-xs font-medium mb-2" style={{ color: "#6b5a8a" }}>
+            <p
+              className="text-xs font-medium mb-2"
+              style={{ color: "#6b5a8a" }}
+            >
               Previously eliminated
             </p>
             {[...previouslyEliminated].map((id) => {
@@ -320,10 +346,12 @@ export default function ShowcaseStage({
         >
           <div
             className="h-full rounded-full progress-fill"
-            style={{
-              "--progress-width": `${progressPct}%`,
-              background: "linear-gradient(90deg, #a78bfa, #fbbf24)",
-            } as React.CSSProperties}
+            style={
+              {
+                "--progress-width": `${progressPct}%`,
+                background: "linear-gradient(90deg, #a78bfa, #fbbf24)",
+              } as React.CSSProperties
+            }
           />
         </div>
         <p className="text-[10px] font-medium" style={{ color: "#6b5a8a" }}>
