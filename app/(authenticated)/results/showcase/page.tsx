@@ -30,7 +30,12 @@ export default function ShowcasePage() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
   const [revealedWinners, setRevealedWinners] = useState<
-    { category: Category; winner: NomineeInfo | null; isDraw: boolean; drawNames: string }[]
+    {
+      category: Category;
+      winner: NomineeInfo | null;
+      isDraw: boolean;
+      drawNames: string;
+    }[]
   >([]);
 
   const introTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,7 +87,7 @@ export default function ShowcasePage() {
           setPhase("rounds");
           setRoundIndex(0);
         }
-      }, 1500);
+      }, 5000);
     }
     return () => {
       if (introTimerRef.current) clearTimeout(introTimerRef.current);
@@ -155,7 +160,9 @@ export default function ShowcasePage() {
           winner: winnerInfo,
           isDraw: result.isDraw,
           drawNames: result.isDraw
-            ? result.drawBetween.map((id) => current.nominees[id]?.label).join(" & ")
+            ? result.drawBetween
+                .map((id) => current.nominees[id]?.label)
+                .join(" & ")
             : "",
         },
       ]);
@@ -240,7 +247,10 @@ export default function ShowcasePage() {
         {/* Exit button */}
         <button
           className="absolute top-6 right-8 text-sm font-medium px-3 py-1 rounded-lg transition-colors"
-          style={{ color: "#8b80a8", backgroundColor: "rgba(255,255,255,0.05)" }}
+          style={{
+            color: "#8b80a8",
+            backgroundColor: "rgba(255,255,255,0.05)",
+          }}
           onClick={(e) => {
             e.stopPropagation();
             router.push("/results");
