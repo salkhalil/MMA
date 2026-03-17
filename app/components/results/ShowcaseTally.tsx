@@ -67,16 +67,6 @@ export default function ShowcaseTally({
     ? revealedWinners[revealedWinners.length - 1].category.name
     : null;
 
-  // Build a position map for upcoming categories
-  const positionMap = new Map<string, number>();
-  let pos = 1;
-  // Current category doesn't get a number
-  for (const name of ceremonyOrder) {
-    if (revealedNames.has(name)) continue;
-    if (name === currentCategory) continue;
-    positionMap.set(name, pos++);
-  }
-
   return (
     <div
       className="hidden sm:flex flex-col w-72 border-l overflow-y-auto custom-scrollbar"
@@ -121,7 +111,7 @@ export default function ShowcaseTally({
                   />
                 </div>
 
-                <div className="space-y-0.5 tally-slide-in">
+                <div className="space-y-0.5">
                   {groupCategories.map((name) => {
                     const revealed = revealedWinners.find(
                       (w) => w.category.name === name
@@ -217,26 +207,18 @@ export default function ShowcaseTally({
                     }
 
                     // Upcoming
-                    const position = positionMap.get(name);
                     return (
                       <div
                         key={name}
                         className="flex items-center gap-2.5 p-2"
                       >
-                        <span
-                          className="flex-shrink-0 w-4 h-4 rounded text-center leading-4"
-                          style={{
-                            fontSize: 9,
-                            fontWeight: 600,
-                            color: "#4b3a6b",
-                            backgroundColor: "rgba(75, 58, 107, 0.3)",
-                          }}
-                        >
-                          {position}
-                        </span>
+                        <div
+                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: "#2e2440" }}
+                        />
                         <p
                           className="text-xs truncate"
-                          style={{ color: "#6b5a8a" }}
+                          style={{ color: "#4b3a6b" }}
                         >
                           {name}
                         </p>
