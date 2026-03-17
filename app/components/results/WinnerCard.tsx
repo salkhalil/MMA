@@ -46,12 +46,20 @@ export default function WinnerCard({ category, result, nominees, onClick }: Prop
             const imgPath = isPerson
               ? winnerInfo.photoPath || winnerInfo.posterPath
               : winnerInfo.posterPath || winnerInfo.photoPath;
-            return imgPath ? (
-              <img
-                src={`https://image.tmdb.org/t/p/w300${imgPath}`}
-                alt={winnerInfo.label}
-                className="w-full h-full object-cover"
-              />
+            const imgUrl = imgPath ? `https://image.tmdb.org/t/p/w300${imgPath}` : null;
+            return imgUrl ? (
+              <>
+                <img
+                  src={imgUrl}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50"
+                />
+                <img
+                  src={imgUrl}
+                  alt={winnerInfo.label}
+                  className="relative w-full h-full object-contain"
+                />
+              </>
             ) : (
               <div
                 className="text-4xl font-bold"
@@ -75,13 +83,20 @@ export default function WinnerCard({ category, result, nominees, onClick }: Prop
                   ? info.photoPath || info.posterPath
                   : info.posterPath || info.photoPath
                 : null;
-              return imgPath ? (
-                <img
-                  key={id}
-                  src={`https://image.tmdb.org/t/p/w300${imgPath}`}
-                  alt={info?.label ?? id}
-                  className="h-full object-cover flex-1 min-w-0"
-                />
+              const imgUrl = imgPath ? `https://image.tmdb.org/t/p/w300${imgPath}` : null;
+              return imgUrl ? (
+                <div key={id} className="relative flex-1 min-w-0 h-full overflow-hidden">
+                  <img
+                    src={imgUrl}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-50"
+                  />
+                  <img
+                    src={imgUrl}
+                    alt={info?.label ?? id}
+                    className="relative w-full h-full object-contain"
+                  />
+                </div>
               ) : (
                 <div
                   key={id}
