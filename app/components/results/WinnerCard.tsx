@@ -40,18 +40,59 @@ export default function WinnerCard({ category, result, nominees, onClick }: Prop
         className="relative h-48 flex items-center justify-center"
         style={{ background: "var(--background-secondary)" }}
       >
-        {winnerInfo?.posterPath ? (
-          <img
-            src={`https://image.tmdb.org/t/p/w300${winnerInfo.posterPath}`}
-            alt={winnerInfo.label}
-            className="w-full h-full object-cover"
-          />
-        ) : winnerInfo?.photoPath ? (
-          <img
-            src={`https://image.tmdb.org/t/p/w300${winnerInfo.photoPath}`}
-            alt={winnerInfo.label}
-            className="w-full h-full object-cover"
-          />
+        {winnerInfo ? (
+          (() => {
+            const isPerson = category.type === "ACTOR" || category.type === "DIRECTOR";
+            const imgPath = isPerson
+              ? winnerInfo.photoPath || winnerInfo.posterPath
+              : winnerInfo.posterPath || winnerInfo.photoPath;
+            return imgPath ? (
+              <img
+                src={`https://image.tmdb.org/t/p/w300${imgPath}`}
+                alt={winnerInfo.label}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div
+                className="text-4xl font-bold"
+                style={{
+                  background: "var(--gradient-primary)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                ?
+              </div>
+            );
+          })()
+        ) : result.isDraw && result.drawBetween.length > 0 ? (
+          <div className="flex w-full h-full gap-0.5">
+            {result.drawBetween.map((id) => {
+              const info = nominees[id];
+              const isPerson = category.type === "ACTOR" || category.type === "DIRECTOR";
+              const imgPath = info
+                ? isPerson
+                  ? info.photoPath || info.posterPath
+                  : info.posterPath || info.photoPath
+                : null;
+              return imgPath ? (
+                <img
+                  key={id}
+                  src={`https://image.tmdb.org/t/p/w300${imgPath}`}
+                  alt={info?.label ?? id}
+                  className="h-full object-cover flex-1 min-w-0"
+                />
+              ) : (
+                <div
+                  key={id}
+                  className="flex-1 flex items-center justify-center text-sm font-bold min-w-0"
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  {info?.label ?? "?"}
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <div
             className="text-4xl font-bold"
