@@ -174,7 +174,7 @@ export default function ShowcasePage() {
         setCategoryIndex((i) => i + 1);
         setPhase("intro");
         setRoundIndex(0);
-      }, 500);
+      }, 800);
       return;
     }
   }, [current, phase, roundIndex, totalRounds, isLastCategory]);

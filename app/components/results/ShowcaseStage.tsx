@@ -13,6 +13,26 @@ interface Props {
   roundIndex: number;
 }
 
+function LetterStagger({ text, className, style }: { text: string; className?: string; style?: React.CSSProperties }) {
+  return (
+    <span className={className} style={style}>
+      {text.split("").map((char, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: 0,
+            animation: `letterFadeIn 0.3s ease-out ${i * 0.04}s forwards`,
+            whiteSpace: char === " " ? "pre" : undefined,
+          }}
+        >
+          {char}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export default function ShowcaseStage({
   category,
   result,
@@ -21,18 +41,23 @@ export default function ShowcaseStage({
   roundIndex,
 }: Props) {
   if (phase === "transition") {
-    return <div className="w-full max-w-2xl mx-auto" style={{ opacity: 0 }} />;
+    return <div className="w-full max-w-2xl mx-auto zoom-fade-out" />;
   }
 
   // Intro phase
   if (phase === "intro") {
     return (
-      <div className="w-full max-w-2xl mx-auto text-center categoryIntro">
-        <p className="text-lg font-medium mb-3" style={{ color: "#8b80a8" }}>
+      <div className="w-full max-w-2xl mx-auto text-center stagger-fade-in zoom-fade-in">
+        <p className="text-lg font-medium tracking-widest uppercase mb-4" style={{ color: "#8b80a8" }}>
           Presenting
         </p>
+
+        <div className="ornament mb-5">
+          <span style={{ color: "#8b80a8", fontSize: 10 }}>&#9670;</span>
+        </div>
+
         <h1
-          className="text-5xl sm:text-6xl font-bold"
+          className="text-5xl sm:text-6xl font-bold blurIn"
           style={{
             background: "linear-gradient(135deg, #fbbf24 0%, #f472b6 100%)",
             WebkitBackgroundClip: "text",
@@ -42,9 +67,15 @@ export default function ShowcaseStage({
         >
           {category.name}
         </h1>
-        <p className="text-sm mt-4" style={{ color: "#8b80a8" }}>
-          {result.rounds.length} round{result.rounds.length !== 1 ? "s" : ""} of voting
-        </p>
+
+        <div className="mt-6 space-y-1">
+          <p className="text-sm font-medium" style={{ color: "#c4b5e8" }}>
+            {result.rounds.length} round{result.rounds.length !== 1 ? "s" : ""} of voting
+          </p>
+          <p className="text-xs" style={{ color: "#6b5a8a" }}>
+            Instant Runoff Voting
+          </p>
+        </div>
       </div>
     );
   }
@@ -71,6 +102,12 @@ export default function ShowcaseStage({
       ? result.drawBetween.map((id) => nominees[id]).filter(Boolean)
       : [];
 
+    const winnerName = winnerInfo
+      ? winnerInfo.label
+      : isDraw
+      ? drawNominees.map((n) => n.label).join(" & ")
+      : "No winner";
+
     return (
       <div className="w-full max-w-2xl mx-auto text-center space-y-6">
         <p className="text-lg font-medium" style={{ color: "#8b80a8" }}>
@@ -78,18 +115,18 @@ export default function ShowcaseStage({
         </p>
 
         <p
-          className="text-xl animate-fade-in-up"
+          className="text-xl typewriter-label"
           style={{ color: "#c4b5e8" }}
         >
-          {isDraw ? "It's a draw..." : "And the winner is..."}
+          {isDraw ? "It\u2019s a draw..." : "And the winner is..."}
         </p>
 
-        <div className="winnerReveal space-y-4">
-          {/* Single winner image */}
+        <div className="space-y-4" style={{ animation: "none" }}>
+          {/* Single winner image — delayed 0.8s */}
           {!isDraw && heroImg && (
-            <div className="flex justify-center">
+            <div className="flex justify-center" style={{ opacity: 0, animation: "springBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s forwards" }}>
               <div
-                className="overflow-hidden shadow-2xl"
+                className="overflow-hidden shadow-2xl glowPulse"
                 style={{
                   width: isPerson ? 160 : 140,
                   height: isPerson ? 160 : 210,
@@ -109,14 +146,16 @@ export default function ShowcaseStage({
           {/* Draw — show all tied nominees */}
           {isDraw && drawNominees.length > 0 && (
             <div className="flex justify-center gap-4 flex-wrap">
-              {drawNominees.map((info) => {
+              {drawNominees.map((info, i) => {
                 const img = getHeroImg(info);
                 if (!img) return null;
                 return (
                   <div
                     key={info.id}
-                    className="overflow-hidden shadow-2xl"
+                    className="overflow-hidden shadow-2xl glowPulse"
                     style={{
+                      opacity: 0,
+                      animation: `springBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.8 + i * 0.15}s forwards`,
                       width: isPerson ? 130 : 110,
                       height: isPerson ? 130 : 170,
                       borderRadius: isPerson ? "50%" : 12,
@@ -134,24 +173,30 @@ export default function ShowcaseStage({
             </div>
           )}
 
-          <h2
-            className="text-4xl sm:text-5xl font-bold shimmer"
-            style={{
-              background: "linear-gradient(135deg, #fbbf24 0%, #f472b6 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            {winnerInfo
-              ? winnerInfo.label
-              : isDraw
-              ? drawNominees.map((n) => n.label).join(" & ")
-              : "No winner"}
-          </h2>
+          {/* Winner name — letter stagger, delayed after image */}
+          <div style={{ opacity: 0, animation: `fadeInUp 0.5s ease-out ${isDraw ? 1.2 : 1.3}s forwards` }}>
+            <LetterStagger
+              text={winnerName}
+              className="text-4xl sm:text-5xl font-bold shimmer inline-block"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f472b6 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                backgroundSize: "200% auto",
+              }}
+            />
+          </div>
 
           {winnerInfo && isPerson && winnerInfo.movieTitle && (
-            <p className="text-lg" style={{ color: "#c4b5e8" }}>
+            <p
+              className="text-lg"
+              style={{
+                color: "#c4b5e8",
+                opacity: 0,
+                animation: `fadeInUp 0.4s ease-out ${isDraw ? 1.5 : 1.6}s forwards`,
+              }}
+            >
               {winnerInfo.movieTitle}
             </p>
           )}
@@ -164,6 +209,8 @@ export default function ShowcaseStage({
   const round: IRVRound = result.rounds[roundIndex];
   if (!round) return null;
 
+  const isLastRound = roundIndex === totalRounds - 1;
+
   const sortedNominees = Object.entries(round.tallies).sort(
     ([, a], [, b]) => b - a
   );
@@ -174,10 +221,18 @@ export default function ShowcaseStage({
     for (const e of result.rounds[i].eliminated) previouslyEliminated.add(e);
   }
 
+  const progressPct = ((roundIndex + 1) / totalRounds) * 100;
+
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4">
       {/* Header */}
       <div className="text-center mb-6">
+        <p
+          className="text-sm font-medium uppercase tracking-wider mb-2 animate-fade-in-up"
+          style={{ color: "#a78bfa" }}
+        >
+          {isLastRound ? "Final Round" : `Elimination Round ${round.roundNumber}`}
+        </p>
         <h2
           className="text-3xl sm:text-4xl font-bold mb-2"
           style={{
@@ -196,7 +251,8 @@ export default function ShowcaseStage({
 
       {/* Bars */}
       <div
-        className="rounded-2xl p-6 space-y-1"
+        className="rounded-2xl p-6 space-y-1 slide-up-stagger"
+        key={`round-${roundIndex}`}
         style={{ backgroundColor: "rgba(255,255,255,0.03)" }}
       >
         {sortedNominees.map(([id, votes]) => {
@@ -210,15 +266,23 @@ export default function ShowcaseStage({
             : ("active" as const);
 
           return (
-            <ShowcaseNomineeBar
+            <div
               key={id}
-              info={info}
-              votes={votes}
-              maxVotes={maxVotes}
-              totalVotes={round.totalActiveVotes}
-              state={state}
-              categoryType={category.type}
-            />
+              style={
+                isEliminated
+                  ? { animation: "eliminatedFlash 1s ease-out 0.5s forwards" }
+                  : undefined
+              }
+            >
+              <ShowcaseNomineeBar
+                info={info}
+                votes={votes}
+                maxVotes={maxVotes}
+                totalVotes={round.totalActiveVotes}
+                state={state}
+                categoryType={category.type}
+              />
+            </div>
           );
         })}
 
@@ -248,24 +312,23 @@ export default function ShowcaseStage({
         )}
       </div>
 
-      {/* Round dots */}
-      <div className="flex justify-center gap-2 pt-2">
-        {result.rounds.map((_, i) => (
+      {/* Progress bar */}
+      <div className="flex flex-col items-center gap-1.5 pt-2">
+        <div
+          className="w-32 h-1.5 rounded-full overflow-hidden"
+          style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+        >
           <div
-            key={i}
-            className="rounded-full transition-all duration-300"
+            className="h-full rounded-full progress-fill"
             style={{
-              width: i === roundIndex ? 10 : 6,
-              height: i === roundIndex ? 10 : 6,
-              backgroundColor:
-                i === roundIndex
-                  ? "#fbbf24"
-                  : i < roundIndex
-                  ? "#a78bfa"
-                  : "#4b3a6b",
-            }}
+              "--progress-width": `${progressPct}%`,
+              background: "linear-gradient(90deg, #a78bfa, #fbbf24)",
+            } as React.CSSProperties}
           />
-        ))}
+        </div>
+        <p className="text-[10px] font-medium" style={{ color: "#6b5a8a" }}>
+          {roundIndex + 1} / {totalRounds}
+        </p>
       </div>
     </div>
   );
