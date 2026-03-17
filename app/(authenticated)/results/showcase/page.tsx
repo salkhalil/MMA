@@ -112,37 +112,40 @@ export default function ShowcasePage() {
     };
   }, [phase, roundIndex, totalRounds]);
 
-  // Fire confetti + reveal winner in sidebar on winner phase
+  // Fire confetti on winner phase
   useEffect(() => {
-    if (phase === "winner" && !confettiFired.current && current) {
+    if (phase === "winner" && !confettiFired.current) {
       confettiFired.current = true;
       if (isBestPicture) {
         fireBestPictureConfetti();
       } else {
         fireWinnerConfetti();
       }
+    }
+  }, [phase, isBestPicture]);
 
+  // Reveal winner in sidebar immediately when entering winner phase
+  useEffect(() => {
+    if (phase !== "winner" || !current) return;
+    setRevealedWinners((prev) => {
+      if (prev.some((w) => w.category.name === current.category.name)) return prev;
       const result = current.result;
       const winnerInfo = result.winner ? current.nominees[result.winner] : null;
-      setRevealedWinners((prev) => {
-        // Avoid duplicates if effect re-fires
-        if (prev.some((w) => w.category.name === current.category.name)) return prev;
-        return [
-          ...prev,
-          {
-            category: current.category,
-            winner: winnerInfo,
-            isDraw: result.isDraw,
-            drawNames: result.isDraw
-              ? result.drawBetween
-                  .map((id) => current.nominees[id]?.label)
-                  .join(" & ")
-              : "",
-          },
-        ];
-      });
-    }
-  }, [phase, isBestPicture, current]);
+      return [
+        ...prev,
+        {
+          category: current.category,
+          winner: winnerInfo,
+          isDraw: result.isDraw,
+          drawNames: result.isDraw
+            ? result.drawBetween
+                .map((id) => current.nominees[id]?.label)
+                .join(" & ")
+            : "",
+        },
+      ];
+    });
+  }, [phase, categoryIndex]);
 
   const advance = useCallback(() => {
     if (!current) return;
