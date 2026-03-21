@@ -16,14 +16,35 @@ export interface IRVRound {
   tiebrokenBy?: "potential";
 }
 
+export interface IRVOptions {
+  usePotential?: boolean;
+}
+
 export interface IRVResult {
   rounds: IRVRound[];
   winner?: string;
   isDraw: boolean;
   drawBetween: string[];
+  withoutTiebreak?: IRVResult;
 }
 
-export function runIRV(ballots: Ballot[]): IRVResult {
+export function runIRV(
+  ballots: Ballot[],
+  options: IRVOptions = {},
+): IRVResult {
+  const result = _runIRV(ballots, options);
+  const { usePotential = true } = options;
+  if (usePotential && result.rounds.some((r) => r.tiebrokenBy)) {
+    result.withoutTiebreak = _runIRV(ballots, { usePotential: false });
+  }
+  return result;
+}
+
+function _runIRV(
+  ballots: Ballot[],
+  options: IRVOptions = {},
+): IRVResult {
+  const { usePotential = true } = options;
   const rounds: IRVRound[] = [];
   const eliminated = new Set<string>();
   let totalExhausted = 0;
@@ -90,7 +111,7 @@ export function runIRV(ballots: Ballot[]): IRVResult {
     let remaining = active.filter((n) => !bottomTied.includes(n));
     if (remaining.length === 0) {
       // Last resort: try potential tiebreak even when all are tied
-      if (bottomTied.length > 1) {
+      if (usePotential && bottomTied.length > 1) {
         const potentialMap: Record<string, number> = {};
         for (const nom of bottomTied) {
           potentialMap[nom] = ballots.filter((b) =>
@@ -157,7 +178,7 @@ export function runIRV(ballots: Ballot[]): IRVResult {
       const nonBottomVotes = remaining.map((n) => tallies[n]);
       const nextLowest = Math.min(...nonBottomVotes);
 
-      if (combinedBottomVotes >= nextLowest) {
+      if (usePotential && combinedBottomVotes >= nextLowest) {
         // Step B: Potential tiebreak
         const potentialMap: Record<string, number> = {};
         for (const nom of bottomTied) {

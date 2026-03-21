@@ -179,6 +179,31 @@ describe("runIRV", () => {
     expect(result.rounds[0].tiebrokenBy).toBeUndefined();
   });
 
+  it("withoutTiebreak attached when potential used", () => {
+    const ballots: Ballot[] = [
+      { ranks: ["A", "B"] },
+      { ranks: ["A", "B"] },
+      { ranks: ["B", "A"] },
+      { ranks: ["C"] },
+    ];
+    const result = runIRV(ballots);
+    expect(result.rounds[0].tiebrokenBy).toBe("potential");
+    expect(result.withoutTiebreak).toBeDefined();
+    // Without tiebreak B+C both eliminated → A wins (same winner, different path)
+    expect(result.withoutTiebreak!.winner).toBe("A");
+  });
+
+  it("withoutTiebreak not attached when no tiebreak used", () => {
+    const ballots: Ballot[] = [
+      { ranks: ["A"] },
+      { ranks: ["A"] },
+      { ranks: ["A"] },
+      { ranks: ["B"] },
+    ];
+    const result = runIRV(ballots);
+    expect(result.withoutTiebreak).toBeUndefined();
+  });
+
   it("potential tiebreak leads to winner next round", () => {
     // Round 1: A=2, B=2, C=1, D=1 → C,D tied at bottom
     // C+D combined (2) >= B (2) → potential tiebreak

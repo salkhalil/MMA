@@ -221,6 +221,26 @@ export default function ShowcaseStage({
               {winnerInfo.movieTitle}
             </p>
           )}
+
+          {result.withoutTiebreak && (
+            <p
+              className="text-sm"
+              style={{
+                color: "#6b5a8a",
+                opacity: 0,
+                animation: `fadeInUp 0.4s ease-out 2s forwards`,
+              }}
+            >
+              Without tiebreak:{" "}
+              {result.withoutTiebreak.isDraw
+                ? `Draw between ${result.withoutTiebreak.drawBetween
+                    .map((id) => nominees[id]?.label ?? id)
+                    .join(" & ")}`
+                : result.withoutTiebreak.winner
+                  ? `${nominees[result.withoutTiebreak.winner]?.label ?? result.withoutTiebreak.winner} wins`
+                  : "No winner"}
+            </p>
+          )}
         </div>
       </div>
     );
