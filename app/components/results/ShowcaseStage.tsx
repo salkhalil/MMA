@@ -231,6 +231,7 @@ export default function ShowcaseStage({
   if (!round) return null;
 
   const isLastRound = roundIndex === totalRounds - 1;
+  const isTiebreak = round.tiebrokenBy === "potential";
 
   const sortedNominees = Object.entries(round.tallies).sort(
     ([, a], [, b]) => b - a,
@@ -270,6 +271,17 @@ export default function ShowcaseStage({
         <p className="text-sm" style={{ color: "#8b80a8" }}>
           Round {round.roundNumber} of {totalRounds}
         </p>
+        {isTiebreak && (
+          <p
+            className="text-xs mt-1.5 px-2.5 py-1 rounded-full inline-block"
+            style={{
+              backgroundColor: "rgba(167,139,250,0.12)",
+              color: "#a78bfa",
+            }}
+          >
+            Tiebreak: fewer supporters → eliminated
+          </p>
+        )}
       </div>
 
       {/* Bars */}
@@ -304,6 +316,8 @@ export default function ShowcaseStage({
                 totalVotes={round.totalActiveVotes}
                 state={state}
                 categoryType={category.type}
+                potential={isTiebreak ? round.potential?.[id] : undefined}
+                showPotential={isTiebreak}
               />
             </div>
           );

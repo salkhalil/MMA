@@ -9,6 +9,8 @@ interface Props {
   totalVotes: number;
   state: "active" | "eliminated" | "winner";
   categoryType: string;
+  potential?: number;
+  showPotential?: boolean;
 }
 
 export default function ShowcaseNomineeBar({
@@ -18,6 +20,8 @@ export default function ShowcaseNomineeBar({
   totalVotes,
   state,
   categoryType,
+  potential,
+  showPotential,
 }: Props) {
   const pct = maxVotes > 0 ? (votes / maxVotes) * 100 : 0;
   const votePct = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
@@ -76,11 +80,24 @@ export default function ShowcaseNomineeBar({
               </p>
             )}
           </div>
-          <span
-            className="text-sm font-medium flex-shrink-0 ml-3"
-            style={{ color: "#c4b5e8" }}
-          >
-            {votes} ({votePct}%)
+          <span className="flex items-center gap-2 flex-shrink-0 ml-3">
+            {showPotential && potential != null && (
+              <span
+                className="text-xs px-1.5 py-0.5 rounded-full"
+                style={{
+                  backgroundColor: "rgba(167,139,250,0.15)",
+                  color: "#a78bfa",
+                }}
+              >
+                {potential} supporters
+              </span>
+            )}
+            <span
+              className="text-sm font-medium"
+              style={{ color: "#c4b5e8" }}
+            >
+              {votes} ({votePct}%)
+            </span>
           </span>
         </div>
 
