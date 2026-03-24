@@ -137,16 +137,6 @@ function _runIRV(
             potential: potentialMap,
             tiebrokenBy: "potential",
           };
-          if (remaining.length === 1) {
-            roundData.winner = remaining[0];
-            rounds.push(roundData);
-            return {
-              rounds,
-              winner: remaining[0],
-              isDraw: false,
-              drawBetween: [],
-            };
-          }
           rounds.push(roundData);
           continue;
         }
@@ -213,13 +203,6 @@ function _runIRV(
       ...(potentialData && { potential: potentialData }),
       ...(tiebrokenBy && { tiebrokenBy }),
     };
-
-    // If only 1 remains after elimination → winner
-    if (remaining.length === 1) {
-      roundData.winner = remaining[0];
-      rounds.push(roundData);
-      return { rounds, winner: remaining[0], isDraw: false, drawBetween: [] };
-    }
 
     rounds.push(roundData);
   }
